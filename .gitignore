@@ -1,0 +1,4 @@
+*.o
+s2rd.exe
+s2rd
+*.stackdump
