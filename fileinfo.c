@@ -31,7 +31,7 @@ void parse(filedata* fd) {
 	} else if(strncmp(fd->contents,"VBSP",4) == 0) {
 		fprintf(stderr,"Parsing as bsp. Currently not handled and out of scope.\n");
 		fd->filetype = BSP;
-	} else if(strncmp(fd->contents,"vcs;",4) == 0) {
+	} else if(strncmp(fd->contents,"vcs2",4) == 0) {
 		fprintf(stderr,"Parsing as vcs...\n");
 		fd->filetype = VCS;
 	} else if(strncmp(fd->contents,"// file",7) == 0) {
