@@ -360,6 +360,7 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
 			case SVFL_DATATYPE_BOOLEAN:
 				printf("%s %s: %hhu\n",tabs,obj->type->tags[i].name,*(char*)(obj->data + obj->type->tags[i].df->offset_in_struct));
 				break;
+			case SVFL_DATATYPE_STRING4:
 			case SVFL_DATATYPE_STRING:
 				printf("%s %s: %s\n",tabs,obj->type->tags[i].name,((char*)(obj->data + obj->type->tags[i].df->offset_in_struct) + *((uint32_t*)(obj->data + obj->type->tags[i].df->offset_in_struct))));
 				break;
