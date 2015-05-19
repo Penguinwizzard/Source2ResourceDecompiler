@@ -209,6 +209,7 @@ typedef struct __attribute__((__packed__)) {
 	uint32_t datatype;	// 1     - array reference - 8 bytes - offset 4b, count 4b
 				// 2/n   - enum?
 				// 3     - other resource reference - 8 bytes, holds resource key
+				// 4     - also string? (hmfd)
 				// 11/p  - 
 				// 12/n  - signed number? - 4 bytes
 				// 14/n  - number - 4 bytes
