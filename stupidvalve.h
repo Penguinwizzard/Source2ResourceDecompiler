@@ -172,17 +172,17 @@ typedef struct {
  * NTRO
  */
 typedef struct {
-	uint32_t unknown1;	// Always 4?
+	uint32_t version;	// Always 4? (thanks hmfd for tag)
 	uint32_t typetag;	// Used for structs in structs and the like
 	uint32_t offset_classname;
-	uint32_t unknown2;	// dunno
-	uint32_t unknown4;	// Always 0?
+	uint32_t crc;		// crc (thanks hmfd for tag)
+	uint32_t user_version;	// Always 0? (thanks hmfd for tag)
 	uint16_t length;	// length in data lump
-	uint16_t unknown5;	// Always 4?
-	uint32_t unknown6;	// Always 0?
+	uint16_t alignment;	// Always 4? (thanks hmfd for tag)
+	uint32_t base_struct_id;// Always 0? (thanks hmfd for tag)
 	uint32_t offset_tagheaders;
 	uint32_t num_tags;
-	uint32_t unknown7;
+	uint32_t unknown7;	// padding?
 } svfl_ntro_entry_header_datafile;
 
 #define SVFL_DATATYPE_SUBSTRUCT 1
@@ -201,10 +201,10 @@ typedef struct {
 
 typedef struct __attribute__((__packed__)) {
 	uint32_t offset_tagname;
-	uint16_t unknown1l;	// used for repeated entries?
+	uint16_t count;		// if 0, treat as 1; if more, treat as is
 	uint16_t offset_in_struct;	// increases based on size of entry
-	uint32_t unknown2;	// Always 0?
-	uint32_t unknown3;	// Always 0?
+	uint32_t unknown2;	// Always 0? (hmfd has as "offset to indirection (?)")
+	uint32_t unknown3;	// Always 0? (hmfd has as "number of indirections (?)")
 	uint32_t ref_typetag;	// Type tag referenced
 	uint32_t datatype;	// 1     - array reference - 8 bytes - offset 4b, count 4b
 				// 2/n   - enum?
@@ -237,11 +237,9 @@ typedef struct {
 } svfl_ntro_entry;
 
 typedef struct {
-	uint32_t unknown0;
 	uint32_t version;
+	uint32_t offset_entries;
 	uint32_t numentries;
-	uint32_t unknown1;	// Always 0?
-	uint32_t unknown2;	// Always 0?
 } svfl_ntro_header_datafile;
 
 typedef struct {

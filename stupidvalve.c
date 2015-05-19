@@ -128,16 +128,16 @@ void parse_svf(filedata* fd) {
 			nh->entries = (svfl_ntro_entry*)malloc(nh->df->numentries * sizeof(svfl_ntro_entry));
 			uint32_t j;
 			for(j=0;j < nh->df->numentries;j++) {
-				nh->entries[j].hdf = (svfl_ntro_entry_header_datafile*)(((uint8_t*)nh->df)+sizeof(svfl_ntro_header_datafile)+j*sizeof(svfl_ntro_entry_header_datafile));
+				nh->entries[j].hdf = (svfl_ntro_entry_header_datafile*)(((uint8_t*)&nh->df->offset_entries)+nh->df->offset_entries+j*sizeof(svfl_ntro_entry_header_datafile));
 				nh->entries[j].classname = ((char*)(&nh->entries[j].hdf->offset_classname)) + nh->entries[j].hdf->offset_classname;
 				printf("\t%i: %s (length %u, type tag %.8X)\n",j,nh->entries[j].classname,nh->entries[j].hdf->length, nh->entries[j].hdf->typetag);
 				printf("\t%u %.8X %u   %X %X %X %X\n",
-						nh->entries[j].hdf->unknown1,
-						nh->entries[j].hdf->unknown2,
-						nh->entries[j].hdf->unknown4,
+						nh->entries[j].hdf->version,
+						nh->entries[j].hdf->crc,
+						nh->entries[j].hdf->user_version,
 						nh->entries[j].hdf->length,
-						nh->entries[j].hdf->unknown5,
-						nh->entries[j].hdf->unknown6,
+						nh->entries[j].hdf->alignment,
+						nh->entries[j].hdf->base_struct_id,
 						nh->entries[j].hdf->unknown7);
 				nh->entries[j].tags = (svfl_ntro_entry_tag*)malloc(nh->entries[j].hdf->num_tags * sizeof(svfl_ntro_entry_tag));
 				svfl_ntro_entry_tag_datafile* ths = (svfl_ntro_entry_tag_datafile*)(((char*)(&nh->entries[j].hdf->offset_tagheaders)) + nh->entries[j].hdf->offset_tagheaders);
@@ -150,7 +150,7 @@ void parse_svf(filedata* fd) {
 						case 1:
 							printf("\t\t%s (%.4hX %.4hX %u %u %u), reference of type %.8X\n",
 								nh->entries[j].tags[k].name,
-								nh->entries[j].tags[k].df->unknown1l,
+								nh->entries[j].tags[k].df->count,
 								nh->entries[j].tags[k].df->offset_in_struct,
 								nh->entries[j].tags[k].df->unknown2,
 								nh->entries[j].tags[k].df->unknown3,
@@ -162,7 +162,7 @@ void parse_svf(filedata* fd) {
 						default:
 						printf("\t\t%s (%.4hX %.4hX %u %u %.8X %u)\n",
 								nh->entries[j].tags[k].name,
-								nh->entries[j].tags[k].df->unknown1l,
+								nh->entries[j].tags[k].df->count,
 								nh->entries[j].tags[k].df->offset_in_struct,
 								nh->entries[j].tags[k].df->unknown2,
 								nh->entries[j].tags[k].df->unknown3,
@@ -321,12 +321,12 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
 				}
 				break;
 			case SVFL_DATATYPE_BYTE:
-				if(obj->type->tags[i].df->unknown1l == 0) {
+				if(obj->type->tags[i].df->count == 0) {
 					printf("%s %s: %.2x\n",tabs,obj->type->tags[i].name, *(char*)(obj->data + obj->type->tags[i].df->offset_in_struct));
 				} else {
 					printf("%s %s: ",tabs,obj->type->tags[i].name);
 					uint16_t k;
-					for(k=0;k<obj->type->tags[i].df->unknown1l;k++) {
+					for(k=0;k<obj->type->tags[i].df->count;k++) {
 						printf("%.2x",*(char*)(obj->data + obj->type->tags[i].df->offset_in_struct));
 					}
 					printf("\n");
