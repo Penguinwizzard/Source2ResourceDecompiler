@@ -2,3 +2,5 @@
 s2rd.exe
 s2rd
 *.stackdump
+*.swp
+*_sample/*

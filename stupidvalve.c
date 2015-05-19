@@ -357,7 +357,7 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
 				printf("%s %s: %s\n",tabs,obj->type->tags[i].name,((char*)(obj->data + obj->type->tags[i].df->offset_in_struct) + *((uint32_t*)(obj->data + obj->type->tags[i].df->offset_in_struct))));
 				break;
 			default:
-				printf("%s %u\n",tabs,obj->type->tags[i].df->datatype);
+				printf("%s %s: unhandled type: %u\n",tabs,obj->type->tags[i].name,obj->type->tags[i].df->datatype);
 				break;
 		}
 	}
