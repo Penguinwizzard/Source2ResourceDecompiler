@@ -11,6 +11,7 @@ typedef enum {
 	VMAP_C,
 	SVF,
 	GNV,
+	VCS,
 	BSP    //Source 1, but w/e, let's id it at least
 } filetype_t;
 

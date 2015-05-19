@@ -31,8 +31,11 @@ void parse(filedata* fd) {
 	} else if(strncmp(fd->contents,"VBSP",4) == 0) {
 		fprintf(stderr,"Parsing as bsp. Currently not handled and out of scope.\n");
 		fd->filetype = BSP;
+	} else if(strncmp(fd->contents,"vcs;",4) == 0) {
+		fprintf(stderr,"Parsing as vcs...\n");
+		fd->filetype = VCS;
 	} else if( *((uint32_t*)fd->contents) == fd->length) {
-		fprintf(stderr,"Parsing as one of valve's stupid new formats without magic numbers...\n");
+		fprintf(stderr,"Parsing as SVF...\n");
 		parse_svf(fd);
 	} else {
 		fprintf(stderr,"Unknown file type.\n");

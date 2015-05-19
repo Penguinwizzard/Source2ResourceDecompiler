@@ -282,6 +282,9 @@ void parse_object(svfl_struct* object, svfl_ntro_header* ntro, char* data) {
 	printf("finished parsing a %s at %x\n",object->type->classname,(uint32_t)(object->data - data));
 }
 
+/*
+ * The internal version, with specifyable depth.
+ */
 void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
 	char tabs[31];
 	snprintf(tabs,30,"%*.s",depth,"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
@@ -371,6 +374,9 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
 	}
 }
 
+/*
+ * The external version (tab reasons)
+ */
 void print_object_recursive(svfl_struct* obj) {
 	print_object_recursive_internal(obj,0);
 }
