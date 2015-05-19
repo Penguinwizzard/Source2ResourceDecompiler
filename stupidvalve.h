@@ -201,7 +201,7 @@ typedef struct {
 
 typedef struct __attribute__((__packed__)) {
 	uint32_t offset_tagname;
-	uint16_t unknown1l;	// dunno
+	uint16_t unknown1l;	// used for repeated entries?
 	uint16_t offset_in_struct;	// increases based on size of entry
 	uint32_t unknown2;	// Always 0?
 	uint32_t unknown3;	// Always 0?
