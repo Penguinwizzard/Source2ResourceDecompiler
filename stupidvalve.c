@@ -344,11 +344,18 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
 			case SVFL_DATATYPE_FLOAT:
 				printf("%s %s: %f\n",tabs,obj->type->tags[i].name,*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct));
 				break;
-			case SVFL_DATATYPE_VECTOR:
+			case SVFL_DATATYPE_VEC3:
 				printf("%s %s: [%f %f %f]\n",tabs,obj->type->tags[i].name,
 						*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct),
 						*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct + 4),
 						*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct + 8));
+				break;
+			case SVFL_DATATYPE_VEC4:
+				printf("%s %s: [%f %f %f %f]\n",tabs,obj->type->tags[i].name,
+						*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct),
+						*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct + 4),
+						*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct + 8),
+						*(float*)(obj->data + obj->type->tags[i].df->offset_in_struct + 12));
 				break;
 			case SVFL_DATATYPE_BOOLEAN:
 				printf("%s %s: %hhu\n",tabs,obj->type->tags[i].name,*(char*)(obj->data + obj->type->tags[i].df->offset_in_struct));
