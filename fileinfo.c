@@ -34,6 +34,9 @@ void parse(filedata* fd) {
 	} else if(strncmp(fd->contents,"vcs;",4) == 0) {
 		fprintf(stderr,"Parsing as vcs...\n");
 		fd->filetype = VCS;
+	} else if(strncmp(fd->contents,"// file",7) == 0) {
+		fprintf(stderr,"Parsing as cloth...\n");
+		fd->filetype = KV_CLOTH;
 	} else if( *((uint32_t*)fd->contents) == fd->length) {
 		fprintf(stderr,"Parsing as SVF...\n");
 		parse_svf(fd);

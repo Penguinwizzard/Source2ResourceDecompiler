@@ -12,6 +12,7 @@ typedef enum {
 	SVF,
 	GNV,
 	VCS,
+	KV_CLOTH,
 	BSP    //Source 1, but w/e, let's id it at least
 } filetype_t;
 
