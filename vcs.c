@@ -19,6 +19,8 @@ void parse_vcs(filedata* fd) {
 	if(type==0) {
 		uint32_t count1 = *(uint32_t*)(fd->contents + cur);
 		cur += 4;
+		if(count1 == 4)
+			count1 = 2;
 		printf("Type 1 count: %u\n",count1);
 		uint32_t i;
 		for(i=0;i<count1;i++) {
@@ -53,15 +55,11 @@ void parse_vcs(filedata* fd) {
 		printf("Type 3 count: %u\n",count3);
 		uint32_t i;
 		for(i=0;i<count3;i++) {
-			vcsl_3* thisone = (vcsl_3*)(fd->contents + cur);
-			printf("\t%s\n",thisone->name);
-			printf("\t\t(unknowns are %.8X %.8X %.8X   %.8X %.8X %.8X)\n",
-					thisone->unknown1,
-					thisone->unknown2,
-					thisone->unknown3,
-					thisone->unknown4,
-					thisone->unknown5,
-					thisone->unknown6);
+			cur += 8;
+		}
+		for(i=0;i<count3;i++) {
+			//vcsl_3* thisone = (vcsl_3*)(fd->contents + cur);
+			printf("\tcontents unknown\n");
 			cur += sizeof(vcsl_3);
 		}
 	}
@@ -105,7 +103,19 @@ void parse_vcs(filedata* fd) {
 		vcsl_6* lastone = NULL;
 		for(i=0;i<count6;i++) {
 			vcsl_6* thisone = (vcsl_6*)(fd->contents + cur);
-			printf("\t%s : %s\n",thisone->name,thisone->string_value);
+			printf("\t%s :",thisone->name);
+			switch(thisone->type) {
+				case VCSL_6_TYPE_T:
+				case VCSL_6_TYPE_VECTOR:
+					printf(" %s\n",thisone->string_value);
+					break;
+				case VCSL_6_TYPE_FLOAT:
+					printf(" %f\n",thisone->float_value);
+					break;
+				default:
+					printf("\n");
+					break;
+			}
 			printf("\t\t(type: %u, unknown: %u)\n",thisone->type,thisone->unknown2);
 			printf("\t\tunknowns:\n");
 			uint32_t j;
@@ -138,6 +148,20 @@ void parse_vcs(filedata* fd) {
 		uint32_t count8 = *(uint32_t*)(fd->contents + cur);
 		cur += 4;
 		printf("Type 8 count: %u\n",count8);
+		uint32_t i;
+		for(i=0;i<count8;i++) {
+			vcsl_8* current = (vcsl_8*)(fd->contents + cur);
+			cur += sizeof(vcsl_8);
+			printf("\t%s:\n",current->name);
+			uint32_t j;
+			for(j=0;j<current->num_keys;j++) {
+				vcsl_8_kv* kv = (vcsl_8_kv*)(fd->contents + cur);
+				printf("\t\t%s\n",kv->name);
+				cur += sizeof(vcsl_8_kv);
+			}
+			// I think there's a CRC checksum or something at the end...
+			cur += 4;
+		}
 	}
 	// Read type 9 lumps
 	{
@@ -145,43 +169,30 @@ void parse_vcs(filedata* fd) {
 		cur += 4;
 		printf("Type 9 count: %u\n",count9);
 		// There is an optional set of strings here...
-		uint32_t flag = *(uint32_t*)(fd->contents + cur);
-		cur += 4;
+		/*uint32_t flag = *(uint32_t*)(fd->contents + cur);
 		if(flag == 1) {
 			printf("\tLump leading strings:\n");
 			while(*(fd->contents+cur)) {
 				printf("\t\t%s\n",fd->contents + cur);
 				cur += strlen(fd->contents + cur)+1;
 			}
-		}
-		cur+=4; // skip a zero
+		}*/
 		{
-			printf("\tunknown0: %u\n",*(uint32_t*)(fd->contents + cur));
-			cur += 4;
-			printf("\tunknown1: %u\n",*(uint32_t*)(fd->contents + cur));
-			cur += 4;
-		}
-		{
-			uint32_t su = *(uint32_t*)(fd->contents + cur);
-			printf("\tsemi-unknown?: %u\n",su);
-			cur += 4;
 			uint32_t j;
-			for(j=0;j<su;j++) {
+			for(j=0;j<count9;j++) {
 				printf("skipping %u\n",*(uint32_t*)(fd->contents + cur));
 				cur += 4;
 				printf(" skipping %u\n",*(uint32_t*)(fd->contents + cur));
 				cur += 4;
-				printf("  skipping %u\n",*(uint32_t*)(fd->contents + cur));
+			}
+			for(j=0;j<count9;j++) {
+				printf("type 2 skip %u\n",*(uint32_t*)(fd->contents + cur));
 				cur += 4;
 			}
 		}
 		{
-			printf("\tunknown0: %u\n",*(uint32_t*)(fd->contents + cur));
+			printf("\timportant value I don't know the purpose of yet: %u\n",*(uint32_t*)(fd->contents + cur));
 			cur += 4;
-			printf("\tunknown1: %u\n",*(uint32_t*)(fd->contents + cur));
-			cur += 4;
-		}
-		{
 			printf("\tlength of first compressed block (with header): %u\n",*(uint32_t*)(fd->contents + cur));
 			cur += 4;
 		}

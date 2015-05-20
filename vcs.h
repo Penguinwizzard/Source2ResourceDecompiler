@@ -24,13 +24,7 @@ typedef struct {
 } vcsl_2;
 
 typedef struct {
-	char name[128];
-	uint32_t unknown1;
-	uint32_t unknown2;
-	uint32_t unknown3;
-	uint32_t unknown4;
-	uint32_t unknown5;
-	uint32_t unknown6;
+	uint32_t unknown[116];
 } vcsl_3;
 
 typedef struct {
@@ -43,6 +37,7 @@ typedef struct {
 	uint32_t unknown6;
 } vcsl_4;
 
+// I got nothin - maybe this is something referenced later?
 typedef struct {
 	uint32_t unknown[118];
 } vcsl_5;
@@ -57,7 +52,14 @@ typedef struct {
 	uint32_t type;
 	uint32_t unknown2;
 	char string_value[64];
-	uint32_t unknown[70];
+	union {
+		struct {
+			uint32_t unknown_l[34];
+			float float_value;
+			uint32_t unknown_h[35];
+		};
+		uint32_t unknown[70];
+	};
 } vcsl_6;
 
 // Note: This is wrong, I just haven't seen this actually get used,
@@ -67,10 +69,15 @@ typedef struct {
 	uint32_t value[10];
 } vcsl_7;
 
-// Haven't seen this one used either.
-/*typedef struct {
-	// doesn't encode well as a struct
-} vcsl_8; */
+typedef struct {
+	char name[72];
+	uint32_t num_keys;
+} vcsl_8;
+
+typedef struct {
+	char name[64];
+	uint32_t unknown[4];
+} vcsl_8_kv;
 
 typedef struct {
 	union {
