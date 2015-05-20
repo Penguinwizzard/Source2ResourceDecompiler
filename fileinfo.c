@@ -33,7 +33,7 @@ void parse(filedata* fd) {
 		fd->filetype = BSP;
 	} else if(strncmp(fd->contents,"vcs2",4) == 0) {
 		fprintf(stderr,"Parsing as vcs...\n");
-		fd->filetype = VCS;
+		parse_vcs(fd);
 	} else if(strncmp(fd->contents,"// file",7) == 0) {
 		fprintf(stderr,"Parsing as cloth...\n");
 		fd->filetype = KV_CLOTH;

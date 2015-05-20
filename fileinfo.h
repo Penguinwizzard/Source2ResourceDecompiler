@@ -28,5 +28,6 @@ filedata* loadfile(char* filename);
 void parse(filedata* fd);
 
 #include "stupidvalve.h"
+#include "vcs.h"
 
 #endif
