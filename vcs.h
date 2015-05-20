@@ -56,7 +56,7 @@ typedef struct {
 	char name[128];
 	uint32_t type;
 	uint32_t unknown2;
-	char value[64];
+	char string_value[64];
 	uint32_t unknown[70];
 } vcsl_6;
 

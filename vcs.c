@@ -102,10 +102,22 @@ void parse_vcs(filedata* fd) {
 		cur += 4;
 		printf("Type 6 count: %u\n",count6);
 		uint32_t i;
+		vcsl_6* lastone = NULL;
 		for(i=0;i<count6;i++) {
 			vcsl_6* thisone = (vcsl_6*)(fd->contents + cur);
-			printf("\t%s : %s\n",thisone->name,thisone->value);
+			printf("\t%s : %s\n",thisone->name,thisone->string_value);
 			printf("\t\t(type: %u, unknown: %u)\n",thisone->type,thisone->unknown2);
+			printf("\t\tunknowns:\n");
+			uint32_t j;
+			for(j=0;j<70;j++) {
+				if(lastone != NULL && lastone->unknown[j] != thisone->unknown[j]) {
+					printf("\x1b[31m%u:%.8X\x1b[0m\t",j,thisone->unknown[j]);
+				} else {
+					printf("%u:%.8X\t",j,thisone->unknown[j]);
+				}
+			}
+			lastone = thisone;
+			printf("\n");
 			cur += sizeof(vcsl_6);
 		}
 	}
