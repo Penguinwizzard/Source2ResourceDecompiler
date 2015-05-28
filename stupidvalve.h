@@ -2,6 +2,7 @@
 #define stupidvalve_h
 #include "fileinfo.h"
 #include<sys/types.h>
+#include<inttypes.h>
 
 // SVF = Stupid Valve Format
 

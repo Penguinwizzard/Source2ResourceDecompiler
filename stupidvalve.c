@@ -32,7 +32,7 @@ void parse_svf(filedata* fd) {
 			for(j=0;j<rh->df->numentries;j++) {
 				rh->entries[j].df = &(dfs[j]);
 				rh->entries[j].content = ((char*)&rh->entries[j].df->offset) + rh->entries[j].df->offset;
-				printf("%.16llx: %s\n",rh->entries[j].df->objecttag,rh->entries[j].content);
+				printf("%.16" PRIx64 ": %s\n",rh->entries[j].df->objecttag,rh->entries[j].content);
 			}
 		} else if(strncmp(ret->lumpheaders[i].tag,"REDI",4) == 0) {
 			//Parse as a Resource Deferred Reference block
@@ -99,7 +99,7 @@ void parse_svf(filedata* fd) {
 				for(j=0;j<rh->df->deferredref.count;j++) {
 					rh->drentries[j].df = &(srdd[j]);
 					rh->drentries[j].content = ((char*)(&srdd[j].offset)) + srdd[j].offset;
-					printf("\t%.16llx: %s\n",rh->drentries[j].df->objecttag,rh->drentries[j].content);
+					printf("\t%.16" PRIx64 ": %s\n",rh->drentries[j].df->objecttag,rh->drentries[j].content);
 				}
 			}
 			// SpecialData multisub
@@ -317,10 +317,10 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
 				if(obj->type->tags[i].df->unknown3 == 1) {
 					uint32_t count = *(uint32_t*)(obj->type->tags[i].df->offset_in_struct + obj->data + 4);
 					for(j=0;j<count;j++) {
-						printf("%s %s: external reference to %.16llX\n",tabs,obj->type->tags[i].name,*(uint64_t*)((char*)(obj->data + obj->type->tags[i].df->offset_in_struct) + *((uint32_t*)(obj->data + obj->type->tags[i].df->offset_in_struct)) + j * 8) );
+						printf("%s %s: external reference to %.16" PRIx64 "\n",tabs,obj->type->tags[i].name,*(uint64_t*)((char*)(obj->data + obj->type->tags[i].df->offset_in_struct) + *((uint32_t*)(obj->data + obj->type->tags[i].df->offset_in_struct)) + j * 8) );
 					}
 				} else {
-					printf("%s %s: external reference to %.16llX\n",tabs,obj->type->tags[i].name,*(uint64_t*)(obj->data + obj->type->tags[i].df->offset_in_struct));
+					printf("%s %s: external reference to %.16" PRIx64 "\n",tabs,obj->type->tags[i].name,*(uint64_t*)(obj->data + obj->type->tags[i].df->offset_in_struct));
 				}
 				break;
 			case SVFL_DATATYPE_BYTE:
