@@ -45,6 +45,7 @@ typedef struct {
 typedef struct {
 	uint32_t unknown1;
 	uint32_t numentries;	// Short and simple
+	uint32_t unknown2;	// fixes a crash after the reborn update.
 } svfl_rerl_header_datafile;
 
 typedef struct {
