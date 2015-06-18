@@ -39,19 +39,26 @@ void parse_svf(filedata* fd) {
 			svfl_redi_header* rh = (svfl_redi_header*)&(ret->lumps[i]);
 			rh->df = (svfl_redi_header_datafile*)rh->content;
 			uint32_t j;
-			// Unknown multisub
-			{
-				printf("SubBlock unknown1 (%u entries)\n",rh->df->unknown1.count);
-			}
-			// Sourceresourceref multisub
+			// Sourceresource multisub
 			{
 				printf("SubBlock sourceresource (%u entries)\n",rh->df->sourceresource.count);
 				rh->srentries = (svfl_redi_sourceresource*)malloc(rh->df->sourceresource.count * sizeof(svfl_redi_sourceresource));
 				svfl_redi_sourceresource_datafile* srsd = (svfl_redi_sourceresource_datafile*)(((char*)&(rh->df->sourceresource.offset)) + rh->df->sourceresource.offset);
 				for(j=0;j<rh->df->sourceresource.count;j++) {
 					rh->srentries[j].filename = ((char*)(&srsd[j].offset_filename)) + srsd[j].offset_filename;
-					rh->srentries[j].mod = ((char*)(&srsd[j].offset_modname)) + srsd[j].offset_modname;
-					printf("\tfile: %s in mod: %s\n",rh->srentries[j].filename,rh->srentries[j].mod);
+					rh->srentries[j].contentsearchpath = ((char*)(&srsd[j].offset_modname)) + srsd[j].offset_modname;
+					printf("\tfile: %s in contentsearchpath: %s\n",rh->srentries[j].filename,rh->srentries[j].contentsearchpath);
+				}
+			}
+			// Sourceresourceadd multisub
+			{
+				printf("SubBlock sourceresourceadd (%u entries)\n",rh->df->sourceresourceadd.count);
+				rh->sraentries = (svfl_redi_sourceresource*)malloc(rh->df->sourceresourceadd.count * sizeof(svfl_redi_sourceresource));
+				svfl_redi_sourceresource_datafile* srsd = (svfl_redi_sourceresource_datafile*)(((char*)&(rh->df->sourceresource.offset)) + rh->df->sourceresource.offset);
+				for(j=0;j<rh->df->sourceresourceadd.count;j++) {
+					rh->sraentries[j].filename = ((char*)(&srsd[j].offset_filename)) + srsd[j].offset_filename;
+					rh->sraentries[j].contentsearchpath = ((char*)(&srsd[j].offset_modname)) + srsd[j].offset_modname;
+					printf("\tfile: %s in contentsearchpath: %s\n",rh->sraentries[j].filename,rh->sraentries[j].contentsearchpath);
 				}
 			}
 			// Typeddata multisub

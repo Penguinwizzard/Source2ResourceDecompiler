@@ -2,7 +2,11 @@ CC=gcc
 CFLAGS=-c -O2 -Wall -Werror -Wextra
 LFLAGS=-O2 -Wall -Werror -Wextra
 
-all: s2rd
+all: s2rd panoramacompiler
+panoramacompiler: panoramacompiler.o
+	$(CC) $(LFLAGS) panoramacompiler.o -o panoramacompiler
+panoramacompiler.o: stupidvalve.h panoramacompiler.c
+	$(CC) $(CFLAGS) panoramacompiler.c -o panoramacompiler.o
 s2rd: s2rd.o fileinfo.o stupidvalve.o vcs.o
 	$(CC) $(LFLAGS) s2rd.o fileinfo.o stupidvalve.o vcs.o -o s2rd
 s2rd.o: s2rd.c s2rd.h

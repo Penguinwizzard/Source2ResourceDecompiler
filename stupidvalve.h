@@ -74,8 +74,8 @@ typedef struct {
 } offsetcount;
 
 typedef struct __attribute__((__packed__)) {
-	offsetcount unknown1;
 	offsetcount sourceresource;
+	offsetcount sourceresourceadd;
 	offsetcount typeddata;
 	offsetcount namemap;
 	offsetcount unknown2;
@@ -87,6 +87,7 @@ typedef struct __attribute__((__packed__)) {
 } svfl_redi_header_datafile;
 
 // Sourceresourceref sub
+// Sourceresourcerefadd sub
 typedef struct {
 	uint32_t offset_filename;
 	uint32_t offset_modname;
@@ -97,7 +98,7 @@ typedef struct {
 typedef struct {
 	svfl_redi_sourceresource_datafile* df;
 	char* filename;
-	char* mod;
+	char* contentsearchpath;
 } svfl_redi_sourceresource;
 
 // Typeddata sub
@@ -155,8 +156,8 @@ typedef struct {
 	uint32_t type;
 	char* content;
 	svfl_redi_header_datafile* df;
-	void* unknown1;
 	svfl_redi_sourceresource* srentries;
+	svfl_redi_sourceresource* sraentries;
 	svfl_redi_typeddata* tdentries;
 	svfl_redi_namemap* nmentries;
 	void* unknown2;
