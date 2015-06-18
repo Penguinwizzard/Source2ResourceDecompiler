@@ -86,8 +86,8 @@ char* construct_file(char* sourcefilename, char* contentdirname, char* contents)
 }
 
 int main(int argc, char** argv) {
-	if(argc < 4) {
-		printf("Penguinwizzard Panorama Compiler v0.1\nUsage: ./panoramacompiler <filename> <internalfilename> <contentdirectory>\nThe last two are used inside the file for reference info.\n");
+	if(argc < 5) {
+		printf("Penguinwizzard Panorama Compiler v0.1\nUsage: ./panoramacompiler <filename> <outputfile> <internalfilename> <contentdirectory>\nThe last two are used inside the file for reference info.\n");
 		return 1;
 	}
 	FILE* f = fopen(argv[1],"r");
