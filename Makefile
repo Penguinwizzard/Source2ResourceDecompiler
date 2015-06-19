@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-c -O2 -Wall -Werror -Wextra
-LFLAGS=-O2 -Wall -Werror -Wextra
+CFLAGS=-c -O2 -Wall -Wextra
+LFLAGS=-O2 -Wall -Wextra
 
 all: s2rd panoramacompiler
 panoramacompiler: panoramacompiler.o
