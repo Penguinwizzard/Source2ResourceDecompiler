@@ -74,7 +74,12 @@ typedef struct {
 	uint32_t count;
 } offsetcount;
 
+#ifndef WIN32
 typedef struct __attribute__((__packed__)) {
+#else
+#pragma pack(push,1)
+typedef struct {
+#endif
 	offsetcount sourceresource;
 	offsetcount sourceresourceadd;
 	offsetcount typeddata;
@@ -86,6 +91,9 @@ typedef struct __attribute__((__packed__)) {
 	offsetcount unknown4;
 	offsetcount unknown5;
 } svfl_redi_header_datafile;
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 // Sourceresourceref sub
 // Sourceresourcerefadd sub
@@ -203,7 +211,12 @@ typedef struct {
 #define SVFL_DATATYPE_BOOLEAN 30
 #define SVFL_DATATYPE_STRING 31
 
+#ifndef WIN32
 typedef struct __attribute__((__packed__)) {
+#else
+#pragma pack(push,1)
+typedef struct {
+#endif
 	uint32_t offset_tagname;
 	uint16_t count;		// if 0, treat as 1; if more, treat as is
 	uint16_t offset_in_struct;	// increases based on size of entry
@@ -226,6 +239,9 @@ typedef struct __attribute__((__packed__)) {
 				// 30/b  - boolean - 1 byte
 				// 31	 - worldNodePrefix/ResoureFileNameList?
 } svfl_ntro_entry_tag_datafile;
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 typedef struct {
 	svfl_ntro_entry_tag_datafile* df;

@@ -185,7 +185,7 @@ void parse_svf(filedata* fd) {
 			// We don't parse it until later
 		} else {
 			printf("\tUNHANDLED LUMP TYPE, POKE PWIZ\n");
-			char output[2*ret->lumpheaders[i].length];
+			char* output = (char*)malloc(2*ret->lumpheaders[i].length*sizeof(char));
 			uint32_t j;
 			for(j=0;j<ret->lumpheaders[i].length;j++) {
 				output[2*j] = (char)downconvert[*((uint8_t*)(((char*)&(ret->lumpheaders[i].offset))+j+ret->lumpheaders[i].offset))/16];
@@ -293,8 +293,8 @@ void parse_object(svfl_struct* object, svfl_ntro_header* ntro, char* data) {
  * The internal version, with specifyable depth.
  */
 void print_object_recursive_internal(svfl_struct* obj, uint32_t depth) {
-	char tabs[31];
-	snprintf(tabs,30,"%*.s",depth,"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
+	char* tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+(50-depth);
+	//snprintf(tabs,30,"%*.s",depth,"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
 	printf("%s%s:\n",tabs,obj->type->classname);
 	uint32_t i;
 	for(i=0;i<obj->type->hdf->num_tags;i++) {
