@@ -3,6 +3,7 @@
 #include "fileinfo.h"
 #include<sys/types.h>
 #include<inttypes.h>
+#include<errno.h>
 
 // SVF = Stupid Valve Format
 

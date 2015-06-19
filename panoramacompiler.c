@@ -91,6 +91,10 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	FILE* f = fopen(argv[1],"r");
+	if(f == NULL) {
+		printf("File read error; error code is %i\n",errno);
+		return 1;
+	}
 	fseek(f, 0, SEEK_END);
 	long size = ftell(f);
 	fseek(f, 0, SEEK_SET);
@@ -104,6 +108,10 @@ int main(int argc, char** argv) {
 	buffer[size]='\0';
 	char* output = construct_file(argv[3],argv[4],buffer);
 	FILE* out = fopen(argv[2],"w");
+	if(out == NULL) {
+		printf("File open error; could not open output file; error code is %i\n",errno);
+		return 1;
+	}
 	fwrite(output,*((uint32_t*)output),1,out);
 	fclose(out);
 	printf("finished!\n");
