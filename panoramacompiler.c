@@ -96,7 +96,10 @@ int main(int argc, char** argv) {
 	fseek(f, 0, SEEK_SET);
 
 	char* buffer = malloc(size+1);
-	fread(buffer, size, 1, f);
+	long size_ret = fread(buffer, size, 1, f);
+	if(size_ret != size) {
+		printf("Warning: File size is being wonky\n");
+	}
 	fclose(f);
 	buffer[size]='\0';
 	char* output = construct_file(argv[3],argv[4],buffer);
