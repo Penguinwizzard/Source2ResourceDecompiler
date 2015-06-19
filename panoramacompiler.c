@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
 	char* buffer = malloc(size+1);
 	long size_ret = fread(buffer, size, 1, f);
 	if(size_ret != size) {
-		printf("Warning: File size is being wonky\n");
+		printf("Warning: File size is being wonky; expected %li but got %li\n",size, size_ret);
 	}
 	fclose(f);
 	buffer[size]='\0';
