@@ -100,9 +100,9 @@ int main(int argc, char** argv) {
 	fseek(f, 0, SEEK_SET);
 
 	char* buffer = malloc(size+1);
-	long size_ret = fread(buffer, 1, size, f);
-	if(size_ret != size) {
-		printf("Warning: File size is being wonky; expected %li but got %li\n",size, size_ret);
+	long num_ret = fread(buffer, size, 1, f);
+	if(num_ret != 1) {
+		printf("Warning: File size is being wonky; expected 1 but got %li\n", num_ret);
 	}
 	fclose(f);
 	buffer[size]='\0';
