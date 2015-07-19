@@ -1,0 +1,218 @@
+[File] Name: bin/axe.vmdl_c | Size: 397C bytes
+[RERL]: offset 2C | length: 110
+000000483dc4490b: 
+0000005aef375c14: 
+0000006caf2395d4: 
+0000008308100031: 
+0000008f84c1007c: 
+
+[REDI]: offset 130 | length: 1F38
+	[SubBlock] sourceresource (50 entries)
+		[File] 'models/heroes/axe/axe.vmdl' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/axe_model.dmx' in contentsearchpath: 'dota_imported'
+		[File] '$key:floatbitmap_t.txt' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/axe_model_lod1.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/includes/axe.collision' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_spawn.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/idle_alt.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/loadout.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/runn.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/run_chase.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/run_haste.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/run_injured.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/run_injured_blood_chaser.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/runn_blood_chaser.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/runn_start.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/runn_settle.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/idle.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/idle_injured.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/idle_injured_blood_chaser.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/stun.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/attack_main.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/attack_main_injured.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/attack_alt.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_berserkers_call_anim.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_berserkers_call.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/rampant_berserkers_call.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_battle_hunger.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/counter_helix.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/culling_blade2.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/death.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/flail.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/idle_alt2.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/counter_helix_blood_chaser.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_taunt_01.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_taunt_02_good_day_sir.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_teleport.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_teleport_end.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_00.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_01.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_02.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_03.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_04.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_05.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_06.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_07.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_08.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/workshop_anim_09.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_forcestaff.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/axe_forcestaff_end.dmx' in contentsearchpath: 'dota_imported'
+		[File] 'models/heroes/axe/dmx/animation/forcestaff_enemy.dmx' in contentsearchpath: 'dota_imported'
+	[SubBlock] sourceresourceadd (0 entries)
+	[SubBlock] typeddata (16 entries)
+		BinaryBlobArg ___OverrideInputData___
+		IntArg expensiveVertices
+		IntArg morph_dump_names
+		StringArg morph_compile_only
+		IntArg morph_cut_min (nameflags = 00000008) (typeflags = 00000008)
+		IntArg morph_cut_max (nameflags = 00000008) (typeflags = 00000008)
+		IntArg morph_write_error
+		StringArg morph_renderer (nameflags = 21BEE673) (typeflags = 21BEE673)
+		IntArg fast
+		IntArg minmipsize
+		IntArg maxmipsize (nameflags = 00100000) (typeflags = 00100000)
+		BinaryBlobArg $key:FloatBitmap_t
+		IntArg fulltangent
+		IntArg force_up_to_date_materials
+		IntArg randomize_mesh
+		IntArg skip_mesh_optimization
+	[SubBlock] namemap (8 entries)
+		CompileModel -> Model Compiler Version (val:27)
+		CompileMorph -> Morph Compiler Version (val:9)
+		CompileTexture -> Texture Compiler Version (val:b)
+		CompileTexture -> Texture Compiler Version Mip None (val:1)
+		CompileRenderMesh -> Mesh Compiler Version (val:1c)
+		CompileVPhysXData -> Collision Mesh Compiler Version (val:60)
+		CompileAnimGroup -> Animation Group Compiler Version (val:20)
+		CompileAnimation -> Animation Compiler Version (val:2a)
+	[SubBlock] unknown2 (0 entries)
+	[SubBlock] unknown3 (34 entries)
+	[SubBlock] deferredref (5 entries)
+		3dc4490b2eca0000: models/heroes/axe/axe_model.vmorf
+		ef375c14a37e3cff: models/heroes/axe/axe_model.vmesh
+		af2395d400e837ff: models/heroes/axe/axe_model_lod1.vmesh
+		08100031badded80: models/heroes/axe/axe.vphys
+		84c1007c1e1d67ff: models/heroes/axe/asset_sequences_c588a788.vagrp
+	[SubBlock] specialdata (1 entries)
+		IsChildResource: 0
+	[SubBlock] unknown4 (0 entries)
+	[SubBlock] unknown5 (0 entries)
+
+[NTRO]: offset 205C | length: 9D9
+	Version: 4
+	0: PermModelData_t                (length 264, type tag 847184F0)
+	  Version:4 | CRC:C7BD3F98 | uVersion:0   L:108 A:8 Id:0 ?:0
+		m_name                        : (0000 0000 0 0 00000000 31)
+		m_modelInfo                   : (0000 0004 0 0 1), ref_typetag:F051D868
+		m_ExtParts                    : (0000 0054 430 1 1), ref_typetag:ABBDA326
+		m_refMeshes                   : (0000 005C 419 1 73656D76 3)
+		m_refMeshGroupMasks           : (0000 0064 416 1 00000000 17)
+		m_refPhysGroupMasks           : (0000 006C 413 1 00000000 17)
+		m_refLODGroupMasks            : (0000 0074 409 1 00000000 11)
+		m_lodGroupSwitchDistances     : (0000 007C 412 1 00000000 18)
+		m_refPhysicsData              : (0000 0084 406 1 79687076 3)
+		m_refPhysicsHitboxData        : (0000 008C 406 1 79687076 3)
+		m_refAnimGroups               : (0000 0094 399 1 72676176 3)
+		m_refSequenceGroups           : (0000 009C 396 1 71657376 3)
+		m_meshGroups                  : (0000 00A4 386 1 00000000 31)
+		m_materialGroups              : (0000 00AC 380 1 1), ref_typetag:C54DF706
+		m_nDefaultMeshGroupMask       : (0000 00B8 0 0 00000000 17)
+		m_modelSkeleton               : (0000 00C0 0 0 1), ref_typetag:BB8C1578
+		m_remappingTable              : (0000 00F0 366 1 00000000 12)
+		m_remappingTableStarts        : (0000 00F8 366 1 00000000 13)
+		m_boneFlexDrivers             : (0000 0100 361 1 1), ref_typetag:D6F6B4EC
+	1: PermModelInfo_t                (length 80, type tag F051D868)
+	  Version:4 | CRC:DB379CD7 | uVersion:0   L:50 A:4 Id:0 ?:0
+		m_nFlags                      : (0000 0000 0 0 00000000 15)
+		m_vHullMin                    : (0000 0004 0 0 00000000 22)
+		m_vHullMax                    : (0000 0010 0 0 00000000 22)
+		m_vViewMin                    : (0000 001C 0 0 00000000 22)
+		m_vViewMax                    : (0000 0028 0 0 00000000 22)
+		m_flMass                      : (0000 0034 0 0 00000000 18)
+		m_vEyePosition                : (0000 0038 0 0 00000000 22)
+		m_flMaxEyeDeflection          : (0000 0044 0 0 00000000 18)
+		m_sSurfaceProperty            : (0000 0048 0 0 00000000 31)
+		m_keyValueText                : (0000 004C 0 0 00000000 31)
+	2: PermModelExtPart_t             (length 48, type tag ABBDA326)
+	  Version:4 | CRC:9CB1E84D | uVersion:0   L:30 A:10 Id:0 ?:0
+		m_Transform                   : (0000 0000 0 0 00000000 40)
+		m_Name                        : (0000 0020 0 0 00000000 31)
+		m_nParent                     : (0000 0024 0 0 00000000 14)
+		m_refModel                    : (0000 0028 0 0 6C646D76 3)
+	3: MaterialGroup_t                (length 12, type tag C54DF706)
+	  Version:4 | CRC:6FC9D048 | uVersion:0   L:C A:4 Id:0 ?:0
+		m_name                        : (0000 0000 0 0 00000000 31)
+		m_materials                   : (0000 0004 35 1 74616D76 3)
+	4: ModelSkeletonData_t            (length 48, type tag BB8C1578)
+	  Version:4 | CRC:E5D493FB | uVersion:0   L:30 A:4 Id:0 ?:0
+		m_boneName                    : (0000 0000 147 1 00000000 31)
+		m_nParent                     : (0000 0008 134 1 00000000 12)
+		m_boneSphere                  : (0000 0010 124 1 00000000 18)
+		m_nFlag                       : (0000 0018 109 1 00000000 15)
+		m_bonePosParent               : (0000 0020 102 1 00000000 22)
+		m_boneRotParent               : (0000 0028 95 1 00000000 25)
+	5: ModelBoneFlexDriver_t          (length 16, type tag D6F6B4EC)
+	  Version:4 | CRC:1B62134E | uVersion:0   L:10 A:4 Id:0 ?:0
+		m_boneName                    : (0000 0000 0 0 00000000 31)
+		m_boneNameToken               : (0000 0004 0 0 00000000 15)
+		m_controls                    : (0000 0008 54 1 1), ref_typetag:40E12EF3
+	6: ModelBoneFlexDriverControl_t   (length 20, type tag 40E12EF3)
+	  Version:4 | CRC:60D5823B | uVersion:0   L:14 A:4 Id:0 ?:0
+		m_nBoneComponent              : (0000 0000 0 0 9B255456 2)
+		m_flexController              : (0000 0004 0 0 00000000 31)
+		m_flexControllerToken         : (0000 0008 0 0 00000000 15)
+		m_flMin                       : (0000 000C 0 0 00000000 18)
+		m_flMax                       : (0000 0010 0 0 00000000 18)
+
+[DATA]: offset 2A38 | length: F0C
+	DATA Lump Length: 3852
+
+[Lump] Tag: RERL | Type: 1280460114
+[Lump] Tag: REDI | Type: 1229210962
+[Lump] Tag: NTRO | Type: 1330795598
+[Lump] Tag: DATA | Type: 1096040772
+
+Potential Multiple (in PermModelData_t)?
+[Parsing Finished] 'PermModelInfo_t' @4
+Potential Multiple (in PermModelData_t)?
+[Parsing Finished] 'ModelSkeletonData_t' @C0
+[Parsing Finished] 'PermModelData_t' @0
+
+
+PermModelData_t:
+ m_name: (str) 'models/heroes/axe/axe.vmdl'
+ m_modelInfo [1]: ˅
+	PermModelInfo_t:
+	 m_nFlags: (flags) 400400
+	 m_vHullMin: (vec3) [0.000000 0.000000 0.000000]
+	 m_vHullMax: (vec3) [0.000000 0.000000 0.000000]
+	 m_vViewMin: (vec3) [0.000000 0.000000 0.000000]
+	 m_vViewMax: (vec3) [0.000000 0.000000 0.000000]
+	 m_flMass: (float) 0.000000
+	 m_vEyePosition: (vec3) [0.000000 0.000000 0.000000]
+	 m_flMaxEyeDeflection: (float) 0.000000
+	 m_sSurfaceProperty: (str) ''
+	 m_keyValueText: (str) ''
+ m_ExtParts [0]: ˅
+ m_refMeshes: (ext ref) ef375c14a37e3cff
+ m_refMeshes: (ext ref) af2395d400e837ff
+ m_refMeshGroupMasks: (unhandled type 17)
+ m_refPhysGroupMasks: (unhandled type 17)
+ m_refLODGroupMasks: (byte) ffffffdc
+ m_lodGroupSwitchDistances: (float) 0.000000
+ m_refPhysicsData: (ext ref) 08100031badded80
+ m_refAnimGroups: (ext ref) 84c1007c1e1d67ff
+ m_meshGroups: (str) ''
+ m_materialGroups [0]: ˅
+ m_nDefaultMeshGroupMask: (unhandled type 17)
+ m_modelSkeleton [1]: ˅
+	ModelSkeletonData_t:
+	 m_boneName: (str) 'ﻀ�
+	 m_nParent: (uint32) 432
+	 m_boneSphere: (float) 0.000000
+	 m_nFlag: (flags) 304
+	 m_bonePosParent: (vec3) [0.000000 0.000000 0.000000]
+	 m_boneRotParent: (unhandled type 25)
+ m_remappingTable: (uint32) 3198
+ m_remappingTableStarts: (unhandled type 13)
+ m_boneFlexDrivers [0]: ˅
