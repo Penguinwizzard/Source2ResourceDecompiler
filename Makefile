@@ -18,8 +18,8 @@ stupidvalve.o: stupidvalve.c stupidvalve.h
 vcs.o: vcs.c vcs.h
 	$(CC) $(CFLAGS) vcs.c -o vcs.o
 js: CC=emcc
-js: s2rdjs
-s2rdjs: s2rd.o fileinfo.o stupidvalve.o vcs.o
+js: s2rd.js
+s2rd.js: s2rd.o fileinfo.o stupidvalve.o vcs.o
 	$(CC) $(LFLAGS) s2rd.o fileinfo.o stupidvalve.o vcs.o -o s2rd.js --embed-file bin/
 clean:
-	rm -f *.o s2rd
+	rm -f *.o s2rd s2rd.js s2rd.js.mem
