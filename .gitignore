@@ -4,3 +4,5 @@ s2rd
 *.stackdump
 *.swp
 *_sample/*
+panoramacompiler.exe
+test

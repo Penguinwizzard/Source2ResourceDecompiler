@@ -15,7 +15,7 @@ filedata* loadfile(char* filename) {
 	fread(ret->contents, ret->length, 1, file);
 	fclose(file);
 	
-	printf("[File] Name: %s | Size: %X bytes\n",filename,ret->length);
+	printf("[File] Name: %s | Size: %lX bytes\n",filename,ret->length);
 	parse(ret);
 	return ret;
 }
