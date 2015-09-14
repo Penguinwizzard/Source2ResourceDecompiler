@@ -5,9 +5,20 @@
 #include<inttypes.h>
 #include<errno.h>
 
+// Pretty common
+typedef struct {
+	uint32_t offset;
+	uint32_t count;
+} offsetcount;
+
 // SVF = Stupid Valve Format
 
+#ifndef WIN32
+typedef struct __attribute__((__packed__)) {
+#else
+#pragma pack(push,1)
 typedef struct {
+#endif
 	uint32_t filelength;	// Why this is specified in a modern format is beyond me
 				// The whole format would be so much better if this was a type-specific magic number instead
 				// We'd actually be able to add a `file` rule for them, we'd be able to do exention-agnostic
@@ -16,10 +27,13 @@ typedef struct {
 				// Also, note that this number is often wrong, so don't use it for allocation or anything 
 				// terribly important. In fact, it's probably better if you ignore this altogether, and 
 				// just go on with your life and ignore the format details.
-	uint32_t unknown_1;	// 12 - Length of lump header?
-	uint32_t unknown_2;	// 8  - ?
-	uint32_t numlumps;	// Number of lumps that immediately follow
+	uint16_t always_twelve;	// 12 - Length of lump header?
+	uint16_t version; // Type information 
+	offsetcount lumps;
 } svf_header;
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 typedef struct {
 	union {
@@ -76,10 +90,6 @@ typedef struct {
 /*
  * REDI
  */
-typedef struct {
-	uint32_t offset;
-	uint32_t count;
-} offsetcount;
 
 #ifndef WIN32
 typedef struct __attribute__((__packed__)) {

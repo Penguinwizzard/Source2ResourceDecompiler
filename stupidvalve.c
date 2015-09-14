@@ -15,9 +15,9 @@ void parse_svf(filedata* fd) {
 		fprintf(stderr,"Warning: SVF header length does not match file length.\n");
 	}
 	ret->lumpheaders = (svflump_header*)(fd->contents + sizeof(svf_header));
-	ret->lumps = (svfl_header*)malloc(sizeof(svfl_header)*ret->hdr->numlumps);
+	ret->lumps = (svfl_header*)malloc(sizeof(svfl_header)*ret->hdr->lumps.count);
 	uint32_t i;
-	for(i=0;i<ret->hdr->numlumps;i++) {
+	for(i=0;i<ret->hdr->lumps.count;i++) {
 		printf("[%c%c%c%c]: offset %X | length: %X\n",RLHI.tag[0],RLHI.tag[1],RLHI.tag[2],RLHI.tag[3],RLHI.offset,RLHI.length);
 		ret->lumps[i].content = OFFS(RLHI.offset);
 		// because dealing with these is a lot faster than doing string checks all the time
@@ -207,7 +207,7 @@ void parse_svf(filedata* fd) {
 	svfl_rerl_header* rerl = NULL;
 	svfl_ntro_header* ntro = NULL;
 	char* data = NULL;
-	for(i=0;i<ret->hdr->numlumps;i++) {
+	for(i=0;i<ret->hdr->lumps.count;i++) {
 		printf("[Lump] Tag: %.4s | Type: %u\n",
 			RLHI.tag, ret->lumps[i].type);
 		switch(ret->lumps[i].type) {

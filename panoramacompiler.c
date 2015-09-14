@@ -5,9 +5,10 @@
 char* construct_file(char* sourcefilename, char* contentdirname, char* contents) {
 	uint32_t length = strlen(sourcefilename) + strlen(contents) + strlen(contentdirname) + 400;
 	svf_header* output = malloc(length);
-	output->unknown_1 = 12;
-	output->unknown_2 = 8;
-	output->numlumps = 2; // REDI and DATA
+	output->always_twelve = 12;
+	output->version = 1;
+	output->lumps.offset = 8;
+	output->lumps.count = 2; // REDI and DATA
 	svflump_header* headers = (svflump_header*)(((char*)output) + sizeof(svf_header)); 
 	headers[0].tag[0]='R';
 	headers[0].tag[1]='E';
@@ -17,7 +18,7 @@ char* construct_file(char* sourcefilename, char* contentdirname, char* contents)
 	headers[1].tag[1]='A';
 	headers[1].tag[2]='T';
 	headers[1].tag[3]='A';
-	svfl_redi_header_datafile* srhd = (svfl_redi_header_datafile*)(((char*)headers) + output->numlumps*sizeof(svflump_header));
+	svfl_redi_header_datafile* srhd = (svfl_redi_header_datafile*)(((char*)headers) + output->lumps.count*sizeof(svflump_header));
 	// we need this
 	srhd->sourceresource.count = 1;
 	srhd->sourceresourceadd.offset = 0;
