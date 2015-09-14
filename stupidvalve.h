@@ -89,14 +89,14 @@ typedef struct {
 #endif
 	offsetcount sourceresource;
 	offsetcount sourceresourceadd;
-	offsetcount typeddata;
+	offsetcount arguments;
 	offsetcount namemap;
-	offsetcount unknown2;
-	offsetcount unknown3;
-	offsetcount deferredref;
-	offsetcount specialdata;
-	offsetcount unknown4;
-	offsetcount unknown5;
+	offsetcount customdeps;
+	offsetcount additional_related;
+	offsetcount child_ref;
+	offsetcount extradata_int;
+	offsetcount extradata_float;
+	offsetcount extradata_string;
 } svfl_redi_header_datafile;
 #ifdef WIN32
 #pragma pack(pop)
@@ -107,8 +107,8 @@ typedef struct {
 typedef struct {
 	uint32_t offset_filename;
 	uint32_t offset_modname;
-	uint32_t unknown1;	// dunno
-	uint32_t unknown2;	// 2?
+	uint32_t CRC;		// CRC of the input file
+	uint32_t flags;		// often 2
 } svfl_redi_sourceresource_datafile;
 
 typedef struct {
@@ -121,22 +121,22 @@ typedef struct {
 typedef struct {
 	uint32_t offset_name;
 	uint32_t offset_type;
-	uint32_t flags1;	// The two flag fields are generally the same value.
-	uint32_t flags2;	// observed are 0x00000001 and 0x00002000
-} svfl_redi_typeddata_datafile;
+	uint32_t fingerprint;		// The two flag fields are generally the same value.
+	uint32_t fingerprint_default;	// observed are 0x00000001 and 0x00002000
+} svfl_redi_argument_datafile;
 
 typedef struct {
-	svfl_redi_typeddata_datafile* df;
+	svfl_redi_argument_datafile* df;
 	char* name;
 	char* type;
-} svfl_redi_typeddata;
+} svfl_redi_argument;
 
 // Namemap sub
 typedef struct {
 	uint32_t offset_expanded;// the longer one, occurs second later :/
 	uint32_t offset_key;	// the shorter one, occurs first later
-	uint32_t unk1;		// Various values
-	uint32_t unk2;		// Always 0?
+	uint32_t fingerprint;		// Various values
+	uint32_t userdata;		// Always 0?
 } svfl_redi_namemap_datafile;
 
 typedef struct {
@@ -149,24 +149,46 @@ typedef struct {
 typedef struct {
 	uint64_t objecttag;	// The tag of the target resource - calculation method unknown
 	uint32_t offset;	// Measured from this entry ... volvo plz
-	uint32_t unknown;	// Always 0?
-} svfl_redi_deferredref_datafile;
+	uint32_t unknown;	// Always 0?  - padding?
+} svfl_redi_childref_datafile;
 
 typedef struct {
-	svfl_redi_deferredref_datafile* df;
+	svfl_redi_childref_datafile* df;
 	char* content;
-} svfl_redi_deferredref;
+} svfl_redi_childref;
 
 // SpecialData sub
 typedef struct {
 	uint32_t offset_key;
 	uint32_t value;
-} svfl_redi_specialdata_datafile;
+} svfl_redi_extradata_int_datafile;
 
 typedef struct {
-	svfl_redi_specialdata_datafile* df;
+	svfl_redi_extradata_int_datafile* df;
 	char* key;
-} svfl_redi_specialdata;
+} svfl_redi_extradata_int;
+
+// SpecialData sub
+typedef struct {
+	uint32_t offset_key;
+	float value;
+} svfl_redi_extradata_float_datafile;
+
+typedef struct {
+	svfl_redi_extradata_float_datafile* df;
+	char* key;
+} svfl_redi_extradata_float;
+
+// SpecialData sub
+typedef struct {
+	uint32_t offset_key;
+	uint32_t value;
+} svfl_redi_extradata_string_datafile;
+
+typedef struct {
+	svfl_redi_extradata_string_datafile* df;
+	char* key;
+} svfl_redi_extradata_string;
 
 typedef struct {
 	uint32_t type;
@@ -174,14 +196,14 @@ typedef struct {
 	svfl_redi_header_datafile* df;
 	svfl_redi_sourceresource* srentries;
 	svfl_redi_sourceresource* sraentries;
-	svfl_redi_typeddata* tdentries;
+	svfl_redi_argument* tdentries;
 	svfl_redi_namemap* nmentries;
 	void* unknown2;
 	void* unknown3;
-	svfl_redi_deferredref* drentries;
-	svfl_redi_specialdata* sdentries;
-	void* unknown4;
-	void* unknown5;
+	svfl_redi_childref* crentries;
+	svfl_redi_extradata_int* edientries;
+	svfl_redi_extradata_float* edfentries;
+	svfl_redi_extradata_string* edsentries;
 	char* resourcename;
 	char* modname;
 } svfl_redi_header;
@@ -189,19 +211,28 @@ typedef struct {
 /*
  * NTRO
  */
+#ifndef WIN32
+typedef struct __attribute__((__packed__)) {
+#else
+#pragma pack(push,1)
 typedef struct {
+#endif
 	uint32_t version;	// Always 4? (thanks hmfd for tag)
 	uint32_t typetag;	// Used for structs in structs and the like
 	uint32_t offset_classname;
 	uint32_t crc;		// crc (thanks hmfd for tag)
-	uint32_t user_version;	// Always 0? (thanks hmfd for tag)
+	 int32_t user_version;	// Always 0? (thanks hmfd for tag)
 	uint16_t length;	// length in data lump
 	uint16_t alignment;	// Always 4? (thanks hmfd for tag)
 	uint32_t base_struct_id;// Always 0? (thanks hmfd for tag)
 	uint32_t offset_tagheaders;
 	uint32_t num_tags;
-	uint32_t unknown7;	// padding?
+	uint8_t struct_flags;
+	uint8_t padding[3];	// padding?
 } svfl_ntro_entry_header_datafile;
+#ifdef WIN32
+#pragma pack(pop)
+#endif
 
 #define SVFL_DATATYPE_SUBSTRUCT 1
 #define SVFL_DATATYPE_ENUM 2
@@ -225,12 +256,11 @@ typedef struct __attribute__((__packed__)) {
 typedef struct {
 #endif
 	uint32_t offset_tagname;
-	uint16_t count;		// if 0, treat as 1; if more, treat as is
-	uint16_t offset_in_struct;	// increases based on size of entry
-	uint32_t unknown2;	// Always 0? (hmfd has as "offset to indirection (?)")
-	uint32_t unknown3;	// Always 0? (hmfd has as "number of indirections (?)")
+	 int16_t count;		// if 0, treat as 1; if more, treat as is
+	 int16_t offset_in_struct;	// increases based on size of entry
+	offsetcount indirections; // Indirect data
 	uint32_t ref_typetag;	// Type tag referenced
-	uint32_t datatype;	// 1     - array reference - 8 bytes - offset 4b, count 4b
+	 int16_t datatype;	// 1     - array reference - 8 bytes - offset 4b, count 4b
 				// 2/n   - enum?
 				// 3     - other resource reference - 8 bytes, holds resource key
 				// 4     - also string? (hmfd)
@@ -245,6 +275,7 @@ typedef struct {
 				// 25/q  - quaternion? - 16 bytes
 				// 30/b  - boolean - 1 byte
 				// 31	 - worldNodePrefix/ResoureFileNameList?
+	uint16_t padding;
 } svfl_ntro_entry_tag_datafile;
 #ifdef WIN32
 #pragma pack(pop)

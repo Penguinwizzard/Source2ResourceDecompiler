@@ -1,5 +1,6 @@
 #include "stupidvalve.h"
 
+#define SETOFFS( x , y )  x = ((char*)( y )) - ((char*)&( x ));
 
 char* construct_file(char* sourcefilename, char* contentdirname, char* contents) {
 	uint32_t length = strlen(sourcefilename) + strlen(contents) + strlen(contentdirname) + 400;
@@ -22,45 +23,45 @@ char* construct_file(char* sourcefilename, char* contentdirname, char* contents)
 	srhd->sourceresourceadd.offset = 0;
 	srhd->sourceresourceadd.count = 0;
 	// we need this
-	srhd->typeddata.count = 1;
+	srhd->arguments.count = 1;
 	// we need this
 	srhd->namemap.count = 1;
-	srhd->unknown2.offset = 0;
-	srhd->unknown2.count = 0;
-	srhd->unknown3.offset = 0;
-	srhd->unknown3.count = 0;
-	srhd->deferredref.offset = 0;
-	srhd->deferredref.count = 0;
+	srhd->customdeps.offset = 0;
+	srhd->customdeps.count = 0;
+	srhd->additional_related.offset = 0;
+	srhd->additional_related.count = 0;
+	srhd->child_ref.offset = 0;
+	srhd->child_ref.count = 0;
 	// we need this
-	srhd->specialdata.count = 1;
-	srhd->unknown4.offset = 0;
-	srhd->unknown4.count = 0;
-	srhd->unknown5.offset = 0;
-	srhd->unknown5.count = 0;
+	srhd->extradata_int.count = 1;
+	srhd->extradata_float.offset = 0;
+	srhd->extradata_float.count = 0;
+	srhd->extradata_string.offset = 0;
+	srhd->extradata_string.count = 0;
 	svfl_redi_sourceresource_datafile* sourceref = (svfl_redi_sourceresource_datafile*)(((char*)srhd) + sizeof(svfl_redi_header_datafile));
-	sourceref->unknown1 = 0;
-	sourceref->unknown2 = 2;
-	srhd->sourceresource.offset = ((char*)sourceref) - ((char*)&(srhd->sourceresource.offset));
+	sourceref->CRC = 0; // Who cares about passing tests?
+	sourceref->flags = 2;
+	SETOFFS(srhd->sourceresource.offset, sourceref);
 	// we'll have the strings later
 
-	svfl_redi_typeddata_datafile* tdentry = (svfl_redi_typeddata_datafile*)(((char*)sourceref) + sizeof(svfl_redi_sourceresource_datafile));
-	tdentry->flags1 = 0;
-	tdentry-> flags2 = 0;
-	srhd->typeddata.offset = ((char*)tdentry) - ((char*)&(srhd->typeddata.offset));
+	svfl_redi_argument_datafile* tdentry = (svfl_redi_argument_datafile*)(((char*)sourceref) + sizeof(svfl_redi_sourceresource_datafile));
+	tdentry->fingerprint = 0;
+	tdentry-> fingerprint_default = 0;
+	SETOFFS(srhd->arguments.offset, tdentry);
 	// we'll have the strings later
 
-	svfl_redi_namemap_datafile* ndentry = (svfl_redi_namemap_datafile*)(((char*)tdentry) + sizeof(svfl_redi_typeddata_datafile));
-	ndentry->unk1 = 5;
-	ndentry->unk2 = 0;
-	srhd->namemap.offset = ((char*)ndentry) - ((char*)&(srhd->namemap.offset));
+	svfl_redi_namemap_datafile* ndentry = (svfl_redi_namemap_datafile*)(((char*)tdentry) + sizeof(svfl_redi_argument_datafile));
+	ndentry->fingerprint = 5;
+	ndentry->userdata = 0;
+	SETOFFS(srhd->namemap.offset,ndentry);
 	//we'll have the strings later
 
-	svfl_redi_specialdata_datafile* sdentry = (svfl_redi_specialdata_datafile*)(((char*)ndentry) + sizeof(svfl_redi_namemap_datafile));
+	svfl_redi_extradata_int_datafile* sdentry = (svfl_redi_extradata_int_datafile*)(((char*)ndentry) + sizeof(svfl_redi_namemap_datafile));
 	sdentry->value = 0;
-	srhd->specialdata.offset = ((char*)sdentry) - ((char*)&(srhd->specialdata.offset));
+	SETOFFS(srhd->extradata_int.offset,sdentry);
 
 	//Ok, now for strings
-	char* pointer = (char*)(((char*)sdentry) + sizeof(svfl_redi_specialdata_datafile));
+	char* pointer = (char*)(((char*)sdentry) + sizeof(svfl_redi_extradata_int_datafile));
 
 #define setOffsetString(a,b) strncpy(pointer, (b), 64); (a) = pointer - ((char*)&(a)); pointer += strlen(b)+1;
 
@@ -73,9 +74,9 @@ char* construct_file(char* sourcefilename, char* contentdirname, char* contents)
 	setOffsetString(sdentry->offset_key,"IsChildResource");
 
 	// ok, that's it for REDI
-	headers[0].offset = ((char*)srhd)-(char*)&(headers[0].offset);
+	SETOFFS(headers[0].offset,srhd);
 	headers[0].length = pointer - ((char*)srhd);
-	headers[1].offset = pointer-(char*)&(headers[1].offset);
+	SETOFFS(headers[1].offset,pointer);
 	headers[1].length = strlen(contents) + 6;
 	strncpy(pointer,"",6);
 	pointer += 6;
