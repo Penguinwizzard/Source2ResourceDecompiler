@@ -2,6 +2,9 @@
 
 const char downconvert[16] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
+#define RLHI ret->lumpheaders[i]
+// Take an offset field, and compute the target address
+#define OFFS( x ) (((char*)&( x )) + ( x ))
 /*
  * This new valve file format doesn't have type specifiers, so it's awful to handle.
  */
@@ -11,18 +14,15 @@ void parse_svf(filedata* fd) {
 	if(ret->hdr->filelength != fd->length) {
 		fprintf(stderr,"Warning: SVF header length does not match file length.\n");
 	}
-	ret->lumpheaders = (svflump_header*)(fd->contents + 0x10);
+	ret->lumpheaders = (svflump_header*)(fd->contents + sizeof(svf_header));
 	ret->lumps = (svfl_header*)malloc(sizeof(svfl_header)*ret->hdr->numlumps);
 	uint32_t i;
 	for(i=0;i<ret->hdr->numlumps;i++) {
-		printf("[%c%c%c%c]: offset %X | length: %X\n",ret->lumpheaders[i].tag[0],ret->lumpheaders[i].tag[1],ret->lumpheaders[i].tag[2],ret->lumpheaders[i].tag[3],ret->lumpheaders[i].offset,ret->lumpheaders[i].length);
-		ret->lumps[i].content = (((char*)&(ret->lumpheaders[i].offset)) + ret->lumpheaders[i].offset);
+		printf("[%c%c%c%c]: offset %X | length: %X\n",RLHI.tag[0],RLHI.tag[1],RLHI.tag[2],RLHI.tag[3],RLHI.offset,RLHI.length);
+		ret->lumps[i].content = OFFS(RLHI.offset);
 		// because dealing with these is a lot faster than doing string checks all the time
-		ret->lumps[i].type_aschar[0] = ret->lumpheaders[i].tag[0];
-		ret->lumps[i].type_aschar[1] = ret->lumpheaders[i].tag[1];
-		ret->lumps[i].type_aschar[2] = ret->lumpheaders[i].tag[2];
-		ret->lumps[i].type_aschar[3] = ret->lumpheaders[i].tag[3];
-		if(strncmp(ret->lumpheaders[i].tag,"RERL",4) == 0) {
+		ret->lumps[i].type = RLHI.type_asint;
+		if(strncmp(RLHI.tag,"RERL",4) == 0) {
 			//Parse as a Resource External Reference block
 			svfl_rerl_header* rh = (svfl_rerl_header*)&(ret->lumps[i]);
 			rh->df = (svfl_rerl_header_datafile*)rh->content;
@@ -31,10 +31,10 @@ void parse_svf(filedata* fd) {
 			uint32_t j;
 			for(j=0;j<rh->df->numentries;j++) {
 				rh->entries[j].df = &(dfs[j]);
-				rh->entries[j].content = ((char*)&rh->entries[j].df->offset) + rh->entries[j].df->offset;
+				rh->entries[j].content = OFFS( rh->entries[j].df->offset );
 				printf("%.16" PRIx64 ": %s\n",rh->entries[j].df->objecttag,rh->entries[j].content);
 			}
-		} else if(strncmp(ret->lumpheaders[i].tag,"REDI",4) == 0) {
+		} else if(strncmp(RLHI.tag,"REDI",4) == 0) {
 			//Parse as a Resource Deferred Reference block
 			svfl_redi_header* rh = (svfl_redi_header*)&(ret->lumps[i]);
 			rh->df = (svfl_redi_header_datafile*)rh->content;
@@ -43,10 +43,10 @@ void parse_svf(filedata* fd) {
 			{
 				printf("\t[SubBlock] sourceresource (%u entries)\n",rh->df->sourceresource.count);
 				rh->srentries = (svfl_redi_sourceresource*)malloc(rh->df->sourceresource.count * sizeof(svfl_redi_sourceresource));
-				svfl_redi_sourceresource_datafile* srsd = (svfl_redi_sourceresource_datafile*)(((char*)&(rh->df->sourceresource.offset)) + rh->df->sourceresource.offset);
+				svfl_redi_sourceresource_datafile* srsd = (svfl_redi_sourceresource_datafile*)OFFS(rh->df->sourceresource.offset);
 				for(j=0;j<rh->df->sourceresource.count;j++) {
-					rh->srentries[j].filename = ((char*)(&srsd[j].offset_filename)) + srsd[j].offset_filename;
-					rh->srentries[j].contentsearchpath = ((char*)(&srsd[j].offset_modname)) + srsd[j].offset_modname;
+					rh->srentries[j].filename = OFFS(srsd[j].offset_filename);
+					rh->srentries[j].contentsearchpath = OFFS(srsd[j].offset_modname);
 					printf("\t\t[File] '%s' in contentsearchpath: '%s'\n",rh->srentries[j].filename,rh->srentries[j].contentsearchpath);
 				}
 			}
@@ -54,10 +54,10 @@ void parse_svf(filedata* fd) {
 			{
 				printf("\t[SubBlock] sourceresourceadd (%u entries)\n",rh->df->sourceresourceadd.count);
 				rh->sraentries = (svfl_redi_sourceresource*)malloc(rh->df->sourceresourceadd.count * sizeof(svfl_redi_sourceresource));
-				svfl_redi_sourceresource_datafile* srsd = (svfl_redi_sourceresource_datafile*)(((char*)&(rh->df->sourceresource.offset)) + rh->df->sourceresource.offset);
+				svfl_redi_sourceresource_datafile* srsd = (svfl_redi_sourceresource_datafile*)OFFS(rh->df->sourceresource.offset);
 				for(j=0;j<rh->df->sourceresourceadd.count;j++) {
-					rh->sraentries[j].filename = ((char*)(&srsd[j].offset_filename)) + srsd[j].offset_filename;
-					rh->sraentries[j].contentsearchpath = ((char*)(&srsd[j].offset_modname)) + srsd[j].offset_modname;
+					rh->sraentries[j].filename = OFFS(srsd[j].offset_filename);
+					rh->sraentries[j].contentsearchpath = OFFS(srsd[j].offset_modname);
 					printf("\t\t[File] '%s' in contentsearchpath: '%s'\n",rh->sraentries[j].filename,rh->sraentries[j].contentsearchpath);
 				}
 			}
@@ -65,11 +65,11 @@ void parse_svf(filedata* fd) {
 			{
 				printf("\t[SubBlock] typeddata (%u entries)\n",rh->df->typeddata.count);
 				rh->tdentries = (svfl_redi_typeddata*)malloc(rh->df->typeddata.count*sizeof(svfl_redi_typeddata));
-				svfl_redi_typeddata_datafile* srtd = (svfl_redi_typeddata_datafile*)(((char*)&(rh->df->typeddata.offset)) + rh->df->typeddata.offset);
+				svfl_redi_typeddata_datafile* srtd = (svfl_redi_typeddata_datafile*)OFFS(rh->df->typeddata.offset);
 				for(j=0;j<rh->df->typeddata.count;j++) {
 					rh->tdentries[j].df = &(srtd[j]);
-					rh->tdentries[j].name = ((char*)(&srtd[j].offset_name)) + srtd[j].offset_name;
-					rh->tdentries[j].type = ((char*)(&srtd[j].offset_type)) + srtd[j].offset_type;
+					rh->tdentries[j].name = OFFS(srtd[j].offset_name);
+					rh->tdentries[j].type = OFFS(srtd[j].offset_type);
 					printf("\t\t%s %s",rh->tdentries[j].type,rh->tdentries[j].name);
 					if(srtd[j].flags1 != 0)
 						printf(" (nameflags = %.8X)",srtd[j].flags1);
@@ -82,11 +82,11 @@ void parse_svf(filedata* fd) {
 			{
 				printf("\t[SubBlock] namemap (%u entries)\n",rh->df->namemap.count);
 				rh->nmentries = (svfl_redi_namemap*)malloc(rh->df->namemap.count*sizeof(svfl_redi_namemap));
-				svfl_redi_namemap_datafile* srnd = (svfl_redi_namemap_datafile*)(((char*)&(rh->df->namemap.offset)) + rh->df->namemap.offset);
+				svfl_redi_namemap_datafile* srnd = (svfl_redi_namemap_datafile*)OFFS(rh->df->namemap.offset);
 				for(j=0;j<rh->df->namemap.count;j++) {
 					rh->nmentries[j].df = &(srnd[j]);
-					rh->nmentries[j].key = ((char*)(&srnd[j].offset_key)) + srnd[j].offset_key;
-					rh->nmentries[j].expanded = ((char*)(&srnd[j].offset_expanded)) + srnd[j].offset_expanded;
+					rh->nmentries[j].key = OFFS(srnd[j].offset_key);
+					rh->nmentries[j].expanded = OFFS(srnd[j].offset_expanded);
 					printf("\t\t%s -> %s (val:%x)\n",rh->nmentries[j].key,rh->nmentries[j].expanded,rh->nmentries[j].df->unk1);
 				}
 			}
@@ -102,10 +102,10 @@ void parse_svf(filedata* fd) {
 			{
 				printf("\t[SubBlock] deferredref (%u entries)\n",rh->df->deferredref.count);
 				rh->drentries = (svfl_redi_deferredref*)malloc(rh->df->deferredref.count*sizeof(svfl_redi_deferredref));
-				svfl_redi_deferredref_datafile* srdd = (svfl_redi_deferredref_datafile*)(((char*)&(rh->df->deferredref.offset)) + rh->df->deferredref.offset);
+				svfl_redi_deferredref_datafile* srdd = (svfl_redi_deferredref_datafile*)OFFS(rh->df->deferredref.offset);
 				for(j=0;j<rh->df->deferredref.count;j++) {
 					rh->drentries[j].df = &(srdd[j]);
-					rh->drentries[j].content = ((char*)(&srdd[j].offset)) + srdd[j].offset;
+					rh->drentries[j].content = OFFS(srdd[j].offset);
 					printf("\t\t%.16" PRIx64 ": %s\n",rh->drentries[j].df->objecttag,rh->drentries[j].content);
 				}
 			}
@@ -113,7 +113,7 @@ void parse_svf(filedata* fd) {
 			{
 				printf("\t[SubBlock] specialdata (%u entries)\n",rh->df->specialdata.count);
 				rh->sdentries = (svfl_redi_specialdata*)malloc(rh->df->specialdata.count*sizeof(svfl_redi_specialdata));
-				svfl_redi_specialdata_datafile* srsd = (svfl_redi_specialdata_datafile*)(((char*)&(rh->df->specialdata.offset)) + rh->df->specialdata.offset);
+				svfl_redi_specialdata_datafile* srsd = (svfl_redi_specialdata_datafile*)OFFS(rh->df->specialdata.offset);
 				for(j=0;j<rh->df->specialdata.count;j++) {
 					rh->sdentries[j].df = &(srsd[j]);
 					rh->sdentries[j].key = ((char*)(&srsd[j].offset_key)) + srsd[j].offset_key;
@@ -128,15 +128,15 @@ void parse_svf(filedata* fd) {
 			{
 				printf("\t[SubBlock] unknown5 (%u entries)\n",rh->df->unknown5.count);
 			}
-		} else if(strncmp(ret->lumpheaders[i].tag,"NTRO",4) == 0) {
+		} else if(strncmp(RLHI.tag,"NTRO",4) == 0) {
 			svfl_ntro_header* nh = (svfl_ntro_header*)&(ret->lumps[i]);
 			nh->df = (svfl_ntro_header_datafile*)nh->content;
 			printf("\tVersion: %i\n",nh->df->version);
 			nh->entries = (svfl_ntro_entry*)malloc(nh->df->numentries * sizeof(svfl_ntro_entry));
 			uint32_t j;
 			for(j=0;j < nh->df->numentries;j++) {
-				nh->entries[j].hdf = (svfl_ntro_entry_header_datafile*)(((uint8_t*)&nh->df->offset_entries)+nh->df->offset_entries+j*sizeof(svfl_ntro_entry_header_datafile));
-				nh->entries[j].classname = ((char*)(&nh->entries[j].hdf->offset_classname)) + nh->entries[j].hdf->offset_classname;
+				nh->entries[j].hdf = (svfl_ntro_entry_header_datafile*)(OFFS(nh->df->offset_entries)+j*sizeof(svfl_ntro_entry_header_datafile));
+				nh->entries[j].classname = OFFS(nh->entries[j].hdf->offset_classname);
 				printf("\t%i: %-30s (length %u, type tag %.8X)\n",j,nh->entries[j].classname,nh->entries[j].hdf->length, nh->entries[j].hdf->typetag);
 				printf("\t  Version:%u | CRC:%.8X | uVersion:%u   L:%X A:%X Id:%X ?:%X\n",
 						nh->entries[j].hdf->version,
@@ -147,12 +147,12 @@ void parse_svf(filedata* fd) {
 						nh->entries[j].hdf->base_struct_id,
 						nh->entries[j].hdf->unknown7);
 				nh->entries[j].tags = (svfl_ntro_entry_tag*)malloc(nh->entries[j].hdf->num_tags * sizeof(svfl_ntro_entry_tag));
-				svfl_ntro_entry_tag_datafile* ths = (svfl_ntro_entry_tag_datafile*)(((char*)(&nh->entries[j].hdf->offset_tagheaders)) + nh->entries[j].hdf->offset_tagheaders);
+				svfl_ntro_entry_tag_datafile* ths = (svfl_ntro_entry_tag_datafile*)OFFS(nh->entries[j].hdf->offset_tagheaders);
 				int numrefs = 0;
 				uint32_t k;
 				for(k=0;k < nh->entries[j].hdf->num_tags; k++) {
 					nh->entries[j].tags[k].df = &(ths[k]);
-					nh->entries[j].tags[k].name = ((char*)(&nh->entries[j].tags[k].df->offset_tagname)) + nh->entries[j].tags[k].df->offset_tagname;
+					nh->entries[j].tags[k].name = OFFS(nh->entries[j].tags[k].df->offset_tagname);
 					switch(nh->entries[j].tags[k].df->datatype) {
 						case 1:
 							printf("\t\t%-30s: (%.4hX %.4hX %u %u %u), ref_typetag:%.8X\n",
@@ -180,18 +180,18 @@ void parse_svf(filedata* fd) {
 				}
 				nh->entries[j].numrefs = numrefs;
 			}
-		} else if(strncmp(ret->lumpheaders[i].tag,"DATA",4) == 0) {
-			printf("\tDATA Lump Length: %u\n",ret->lumpheaders[i].length);
+		} else if(strncmp(RLHI.tag,"DATA",4) == 0) {
+			printf("\tDATA Lump Length: %u\n",RLHI.length);
 			// We don't parse it until later
 		} else {
 			printf("\tUNHANDLED LUMP TYPE, POKE PWIZ\n");
-			char* output = (char*)malloc(2*ret->lumpheaders[i].length*sizeof(char));
+			char* output = (char*)malloc(2*RLHI.length*sizeof(char));
 			uint32_t j;
-			for(j=0;j<ret->lumpheaders[i].length;j++) {
-				output[2*j] = (char)downconvert[*((uint8_t*)(((char*)&(ret->lumpheaders[i].offset))+j+ret->lumpheaders[i].offset))/16];
-				output[2*j+1] = (char)downconvert[*((uint8_t*)(((char*)&(ret->lumpheaders[i].offset))+j+ret->lumpheaders[i].offset))%16];
+			for(j=0;j<RLHI.length;j++) {
+				output[2*j] = (char)downconvert[*((uint8_t*)(OFFS(RLHI.offset)+j))/16];
+				output[2*j+1] = (char)downconvert[*((uint8_t*)(OFFS(RLHI.offset)+j))%16];
 			}
-			printf("%.*s\n",2*ret->lumpheaders[i].length,output);
+			printf("%.*s\n",2*RLHI.length,output);
 		}
 		printf("\n");
 	}
@@ -202,7 +202,7 @@ void parse_svf(filedata* fd) {
 	char* data = NULL;
 	for(i=0;i<ret->hdr->numlumps;i++) {
 		printf("[Lump] Tag: %.4s | Type: %u\n",
-			ret->lumpheaders[i].tag, ret->lumps[i].type);
+			RLHI.tag, ret->lumps[i].type);
 		switch(ret->lumps[i].type) {
 			case 1280460114: // RERL - external reference data
 				rerl = (svfl_rerl_header*)&(ret->lumps[i]);

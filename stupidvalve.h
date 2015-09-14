@@ -13,13 +13,19 @@ typedef struct {
 				// We'd actually be able to add a `file` rule for them, we'd be able to do exention-agnostic
 				// code, and a ton of other stuff
 				// But no, Valve is stuck in the 90s.
+				// Also, note that this number is often wrong, so don't use it for allocation or anything 
+				// terribly important. In fact, it's probably better if you ignore this altogether, and 
+				// just go on with your life and ignore the format details.
 	uint32_t unknown_1;	// 12 - Length of lump header?
 	uint32_t unknown_2;	// 8  - ?
 	uint32_t numlumps;	// Number of lumps that immediately follow
 } svf_header;
 
 typedef struct {
-	char tag[4];		// A magic number type identifier. AREN'T THEY NICE VALVE?
+	union {
+		char tag[4];		// A magic number type identifier. AREN'T THEY NICE VALVE?
+		uint32_t type_asint;
+	};
 	uint32_t offset;	// Offset in the source file that the body of the lump starts at
 	uint32_t length;	// Note that length includes the 12 bytes for the header
 } svflump_header;
