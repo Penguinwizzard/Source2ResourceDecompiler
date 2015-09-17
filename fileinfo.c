@@ -42,6 +42,9 @@ void parse(filedata* fd) {
 	} else if( *((uint32_t*)fd->contents) == fd->length) {
 		fprintf(stderr,"Parsing as SVF...\n");
 		parse_svf(fd);
+	} else if( *((uint16_t*)(fd->contents+4)) == 0x0C) {
+		fprintf(stderr,"File length wrong, but speculatively parsing as SVF...\n");
+		parse_svf(fd);
 	} else {
 		fprintf(stderr,"Unknown file type.\n");
 		fd->filetype = UNKNOWN;

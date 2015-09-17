@@ -254,7 +254,7 @@ typedef struct {
 #define SVFL_DATATYPE_FLAGS 15
 #define SVFL_DATATYPE_FLOAT 18
 #define SVFL_DATATYPE_VEC3 22
-#define SVFL_DATATYPE_MASSIVE 23
+#define SVFL_DATATYPE_VECTOR4D 23
 #define SVFL_DATATYPE_VEC4 28
 #define SVFL_DATATYPE_BOOLEAN 30
 #define SVFL_DATATYPE_STRING 31
@@ -325,6 +325,7 @@ typedef struct {
 // which has been encoded as specified. We just need to decode it, and then
 // provide means by which we can access the constituent values.
 typedef struct svfl_struct_t {
+	svfl_ntro_header* NTRO;
 	svfl_ntro_entry* type;
 	struct svfl_struct_t** children;
 	char* data;
