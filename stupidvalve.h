@@ -250,14 +250,20 @@ typedef struct {
 #define SVFL_DATATYPE_STRING4 4
 #define SVFL_DATATYPE_BYTE 11
 #define SVFL_DATATYPE_SINT 12
+#define SVFL_DATATYPE_UINT16 13
 #define SVFL_DATATYPE_NUMBER 14
 #define SVFL_DATATYPE_FLAGS 15
 #define SVFL_DATATYPE_FLOAT 18
 #define SVFL_DATATYPE_VEC3 22
 #define SVFL_DATATYPE_VECTOR4D 23
+#define SVFL_DATATYPE_QUATERNION 25
+#define SVFL_DATATYPE_FLTX4 27
 #define SVFL_DATATYPE_VEC4 28
 #define SVFL_DATATYPE_BOOLEAN 30
 #define SVFL_DATATYPE_STRING 31
+#define SVFL_DATATYPE_MATRIX3X4 33
+#define SVFL_DATATYPE_MATRIX3X4A 36
+#define SVFL_DATATYPE_CTRANSFORM 40
 
 #ifndef WIN32
 typedef struct __attribute__((__packed__)) {
@@ -327,7 +333,6 @@ typedef struct {
 typedef struct svfl_struct_t {
 	svfl_ntro_header* NTRO;
 	svfl_ntro_entry* type;
-	struct svfl_struct_t** children;
 	char* data;
 } svfl_struct;
 

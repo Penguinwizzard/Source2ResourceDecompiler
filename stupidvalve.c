@@ -160,30 +160,27 @@ void parse_svf(filedata* fd) {
 				for(k=0;k < nh->entries[j].hdf->num_tags; k++) {
 					nh->entries[j].tags[k].df = &(ths[k]);
 					nh->entries[j].tags[k].name = OFFS(nh->entries[j].tags[k].df->offset_tagname);
-					switch(nh->entries[j].tags[k].df->datatype) {
-						case 1:
-							printf("\t\t%-30s: (count: %.4hX offset: %.4hX indirections.offset: %u indirections.count: %u datatype: %u), ref_typetag:%.8X\n",
-								nh->entries[j].tags[k].name,
-								nh->entries[j].tags[k].df->count,
-								nh->entries[j].tags[k].df->offset_in_struct,
-								nh->entries[j].tags[k].df->indirections.offset,
-								nh->entries[j].tags[k].df->indirections.count,
-								nh->entries[j].tags[k].df->datatype,
-								nh->entries[j].tags[k].df->ref_typetag);
+					printf("\t\t%-30s: (count: %.4hX offset: %.4hX indirections.offset: %u indirections.count: %u datatype: %u), ref_typetag:%.8X\n",
+							nh->entries[j].tags[k].name,
+							nh->entries[j].tags[k].df->count,
+							nh->entries[j].tags[k].df->offset_in_struct,
+							nh->entries[j].tags[k].df->indirections.offset,
+							nh->entries[j].tags[k].df->indirections.count,
+							nh->entries[j].tags[k].df->datatype,
+							nh->entries[j].tags[k].df->ref_typetag);
+					if(nh->entries[j].tags[k].df->indirections.count > 0) {
+						uint32_t inds;
+						char* baseaddr = OFFS(nh->entries[j].tags[k].df->indirections.offset);
+						printf("\t\t\tindirections:\n");
+						for(inds = 0; inds < nh->entries[j].tags[k].df->indirections.count; inds++) {
+							printf("\t\t\t\t%hhu\n",*(uint8_t*)(baseaddr+inds));
+						}
+					}
+					if(nh->entries[j].tags[k].df->datatype == 1) {
 							nh->entries[j].tags[k].refindex = numrefs;
 							numrefs++;
-							break;
-						default:
-							printf("\t\t%-30s: (count: %.4hX offset: %.4hX indirections.offset: %u indirections.count: %u datatype: %u), ref_typetag:%.8X\n",
-								nh->entries[j].tags[k].name,
-								nh->entries[j].tags[k].df->count,
-								nh->entries[j].tags[k].df->offset_in_struct,
-								nh->entries[j].tags[k].df->indirections.offset,
-								nh->entries[j].tags[k].df->indirections.count,
-								nh->entries[j].tags[k].df->ref_typetag,
-								nh->entries[j].tags[k].df->datatype);
+					} else {
 							nh->entries[j].tags[k].refindex = -1;
-							break;
 					}
 				}
 				nh->entries[j].numrefs = numrefs;
@@ -203,14 +200,14 @@ void parse_svf(filedata* fd) {
 		}
 		printf("\n");
 	}
-	
+
 	// Parse head object
 	svfl_rerl_header* rerl = NULL;
 	svfl_ntro_header* ntro = NULL;
 	char* data = NULL;
 	for(i=0;i<ret->hdr->lumps.count;i++) {
 		printf("[Lump] Tag: %.4s | Type: %u\n",
-			RLHI.tag, ret->lumps[i].type);
+				RLHI.tag, ret->lumps[i].type);
 		switch(ret->lumps[i].type) {
 			case 1280460114: // RERL - external reference data
 				rerl = (svfl_rerl_header*)&(ret->lumps[i]);
@@ -229,17 +226,19 @@ void parse_svf(filedata* fd) {
 		printf("[Lump] No RERL lump...\n");
 	}
 	printf("\n");
-	
+
 	if(data != NULL && ntro != NULL) {
 		svfl_struct* rootobject = (svfl_struct*)malloc(sizeof(svfl_struct));
 		rootobject->NTRO = ntro;
 		rootobject->type = &(ntro->entries[0]);
 		rootobject->data = data;
-		
-		parse_object(rootobject,ntro,data);
-		fd->parsed_object = rootobject;
+
+		//parse_object(rootobject,ntro,data);
+		//fd->parsed_object = rootobject;
 		printf("\n\n");
-		
+
+		printf("file starts at %p\n",fd->contents);
+		printf("data lump starts at %p\n",data);
 		print_object_recursive(rootobject);
 	} else if (ret->hdr->version == 1) {
 		// Version 1 files are stuff like panorama non-xml, and sounds
@@ -259,57 +258,287 @@ void parse_svf(filedata* fd) {
  * Note that this assumes that the type and content pointer for the object have been set.
  * Basically just handles making the other info. 
  */
-void parse_object(svfl_struct* object, svfl_ntro_header* ntro, char* data) {
-	uint32_t i;
-	if(object->type->numrefs > 0) {
-		object->children = (svfl_struct**)malloc(object->type->numrefs * sizeof(svfl_struct));
-	} else {
-		object->children = NULL;
-	}
-	for(i=0;i<object->type->hdf->num_tags;i++) {
-		int curref = object->type->tags[i].refindex;
-		if(curref == -1) {
-			continue;
+/*void parse_object(svfl_struct* object, svfl_ntro_header* ntro, char* data) {
+  uint32_t i;
+  if(object->type->numrefs > 0) {
+  object->children = (svfl_struct**)malloc(object->type->numrefs * sizeof(svfl_struct));
+  } else {
+  object->children = NULL;
+  }
+  for(i=0;i<object->type->hdf->num_tags;i++) {
+  int curref = object->type->tags[i].refindex;
+  if(curref == -1) {
+  continue;
+  }
+// Is this how we indicate contained structs vs referenced structs?
+// Since these can be multiple (because of arrays and the like) we have to allocate arrays and the like.
+if(object->type->tags[i].df->indirections.count == 1) {
+uint32_t offset = *((uint32_t*)(object->type->tags[i].df->offset_in_struct + object->data));
+uint32_t count = *((uint32_t*)(object->type->tags[i].df->offset_in_struct + object->data + 4));
+if(count > 0) {
+uint32_t j;
+svfl_ntro_entry* childtype = do_type_lookup(ntro, object->type->tags[i].df->ref_typetag);
+for(j=0;j<count;j++) {
+object->children[curref][j].NTRO = ntro;
+object->children[curref][j].type = childtype;
+object->children[curref][j].data = object->type->tags[i].df->offset_in_struct + object->data + offset + childtype->hdf->length * j;
+parse_object(&(object->children[curref][j]),ntro,data);
+}
+}
+else {
+object->children[curref] = NULL;
+}
+} else {
+// Note: figure out when this isn't 1
+printf("Potential Multiple (in %s)?\n",object->type->classname);
+uint32_t count = 1; // PROBABLY INCORRECT
+object->children[curref] = (svfl_struct*)malloc(count*sizeof(svfl_struct));
+uint32_t j;
+svfl_ntro_entry* childtype = do_type_lookup(ntro, object->type->tags[i].df->ref_typetag);
+for(j=0;j<count;j++) {
+object->children[curref][j].NTRO = ntro;
+object->children[curref][j].type = childtype;
+object->children[curref][j].data = object->data + object->type->tags[i].df->offset_in_struct + childtype->hdf->length * j;
+parse_object(&(object->children[curref][j]),ntro,data);
+}
+}
+//uint32_t count;
+//uint32_t length;
+//object->children[curref].type = do_type_lookup(ntro,object->type->tags[i].df->ref_typetag);
+//object->children[curref].content = data + object->
+}
+printf("[Parsing Finished] '%s' @%X\n",object->type->classname,(uint32_t)(object->data - data));
+}*/
+
+void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro_entry* curtype);
+
+/*
+ * Print a single tagged item
+ */
+void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_tag* curtag, char* location, int indirectionlevels) {
+	char* tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+(50-depth);
+	if(indirectionlevels > 0) {
+		char* baseaddr = OFFS(curtag->df->indirections.offset);
+		uint32_t indirectiontype = *(uint8_t*)((curtag->df->indirections.count-indirectionlevels) + baseaddr);
+		if(indirectiontype == 3) {
+			printf("%s %s (ptr): ˅\n",tabs, curtag->name);
+			if((*(uint32_t*)location) == 0) {
+				// Null pointer
+				printf("%s\t -> NULL\n",tabs);
+			} else {
+				// single-object pointer derefernce
+				print_thing_at_location(obj, depth+1,curtag, location + *(uint32_t*)(location), indirectionlevels-1);
+			}
 		}
-		// Is this how we indicate contained structs vs referenced structs?
-		// Since these can be multiple (because of arrays and the like) we have to allocate arrays and the like.
-		if(object->type->tags[i].df->indirections.count == 1) {
-			uint32_t offset = *((uint32_t*)(object->type->tags[i].df->offset_in_struct + object->data));
-			uint32_t count = *((uint32_t*)(object->type->tags[i].df->offset_in_struct + object->data + 4));
-			if(count > 0) {
-				object->children[curref] = (svfl_struct*)malloc(count*sizeof(svfl_struct));
-				uint32_t j;
-				svfl_ntro_entry* childtype = do_type_lookup(ntro, object->type->tags[i].df->ref_typetag);
-				for(j=0;j<count;j++) {
-					object->children[curref][j].NTRO = ntro;
-					object->children[curref][j].type = childtype;
-					object->children[curref][j].data = object->type->tags[i].df->offset_in_struct + object->data + offset + childtype->hdf->length * j;
-					parse_object(&(object->children[curref][j]),ntro,data);
+		if(indirectiontype == 4) {
+			uint32_t j;
+			uint32_t count = *(uint32_t*)(location + 4);
+			printf("%s %s [%u]: ˅\n",tabs, curtag->name, count);
+			uint32_t levelsize = 4;
+			if(indirectionlevels - 1 == 0) {
+				switch(curtag->df->datatype) {
+					case SVFL_DATATYPE_SUBSTRUCT:
+						levelsize = do_type_lookup(obj->NTRO, curtag->df->ref_typetag)->hdf->length;
+						break;
+					case SVFL_DATATYPE_BYTE:
+					case SVFL_DATATYPE_BOOLEAN:
+						levelsize = 1;
+						break;
+					case SVFL_DATATYPE_UINT16:
+						levelsize = 2;
+						break;
+					case SVFL_DATATYPE_STRING4:
+					case SVFL_DATATYPE_SINT:
+					case SVFL_DATATYPE_ENUM:
+					case SVFL_DATATYPE_NUMBER:
+					case SVFL_DATATYPE_FLAGS:
+					case SVFL_DATATYPE_FLOAT:
+					case SVFL_DATATYPE_STRING:
+					default:
+						levelsize = 4;
+						break;
+					case SVFL_DATATYPE_EXTREF:
+						levelsize = 8;
+						break;
+					case SVFL_DATATYPE_VEC3:
+						levelsize = 12;
+						break;
+					case SVFL_DATATYPE_VECTOR4D:
+					case SVFL_DATATYPE_QUATERNION:
+					case SVFL_DATATYPE_FLTX4:
+					case SVFL_DATATYPE_VEC4:
+						levelsize = 16;
+						break;
+					case SVFL_DATATYPE_CTRANSFORM:
+						levelsize = 32;
+						break;
+					case SVFL_DATATYPE_MATRIX3X4:
+					case SVFL_DATATYPE_MATRIX3X4A:
+						levelsize = 48;
+						break;
 				}
 			}
-			else {
-				object->children[curref] = NULL;
-			}
-		} else {
-			// Note: figure out when this isn't 1
-			printf("Potential Multiple (in %s)?\n",object->type->classname);
-			uint32_t count = 1; // PROBABLY INCORRECT
-			object->children[curref] = (svfl_struct*)malloc(count*sizeof(svfl_struct));
-			uint32_t j;
-			svfl_ntro_entry* childtype = do_type_lookup(ntro, object->type->tags[i].df->ref_typetag);
 			for(j=0;j<count;j++) {
-				object->children[curref][j].NTRO = ntro;
-				object->children[curref][j].type = childtype;
-				object->children[curref][j].data = object->data + object->type->tags[i].df->offset_in_struct + childtype->hdf->length * j;
-				parse_object(&(object->children[curref][j]),ntro,data);
+				//printf("location will be %p\n",location + *(uint32_t*)(location) + j * levelsize);
+				print_thing_at_location(obj, depth+1,curtag, location + *(uint32_t*)(location) + j * levelsize, indirectionlevels-1);
 			}
 		}
-		//uint32_t count;
-		//uint32_t length;
-		//object->children[curref].type = do_type_lookup(ntro,object->type->tags[i].df->ref_typetag);
-		//object->children[curref].content = data + object->
+	} else {
+		switch(curtag->df->datatype) {
+			svfl_struct* child;
+			case SVFL_DATATYPE_SUBSTRUCT:
+				//curref = curtag->refindex;
+				child = (svfl_struct*)malloc(sizeof(svfl_struct));
+				child->NTRO = obj->NTRO;
+				child->type = do_type_lookup(obj->NTRO, curtag->df->ref_typetag);
+				child->data = location;
+				print_object_recursive_internal(child, depth+1, do_type_lookup(obj->NTRO, curtag->df->ref_typetag));
+				/*if(curtype->tags[i].df->indirections.count == 1) {
+					uint32_t count = *(uint32_t*)( + 4);
+					printf("%s %s [%u]: \n",tabs,curtype->tags[i].name,count);
+					for(j=0;j<count;j++) {
+						print_object_recursive_internal(&(obj->children[curref][j]),depth+1,obj->children[curref][j].type);
+					}
+				} else {
+					uint32_t count = 1;
+					printf("%s %s [%u]: ˅\n",tabs,curtype->tags[i].name,count);
+					for(j=0;j<count;j++) {
+						print_object_recursive_internal(&(obj->children[curref][j]),depth+1,obj->children[curref][j].type);
+					}
+				}*/
+				break;
+			case SVFL_DATATYPE_ENUM:
+				printf("%s %s: (unknown enum) %u\n",tabs,curtag->name,*(uint32_t*)(location));
+				break;
+			case SVFL_DATATYPE_EXTREF:
+				/*if(curtag->df->indirections.count == 1) {
+					uint32_t count = *(uint32_t*)(curtype->tags[i].df->offset_in_struct + obj->data + 4);
+					for(j=0;j<count;j++) {
+						printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtag->name,*(uint64_t*)((char*)(obj->data + curtag->df->offset_in_struct) + *((uint32_t*)(obj->data + curtag->df->offset_in_struct)) + j * 8) );
+					}
+				} else {*/
+					printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtag->name,*(uint64_t*)(location));
+				//}
+				break;
+			case SVFL_DATATYPE_BYTE:
+				if(curtag->df->count == 0) {
+					printf("%s %s: (byte) %.2x\n",tabs,curtag->name, *(char*)(location));
+				} else {
+					printf("%s %s: (bytes)",tabs,curtag->name);
+					uint16_t k;
+					for(k=0;k<curtag->df->count;k++) {
+						printf(" %.2x ",*(char*)(location));
+					}
+					printf("\n");
+				}
+				break;
+			case SVFL_DATATYPE_SINT:
+				printf("%s %s: (uint32) %u\n",tabs,curtag->name,*(uint32_t*)(location));
+				break;
+			case SVFL_DATATYPE_UINT16:
+				printf("%s %s: (uint16) %hu\n",tabs,curtag->name,*(uint16_t*)(location));
+				break;
+			case SVFL_DATATYPE_NUMBER:
+				printf("%s %s: (int32) %i\n",tabs,curtag->name,*(int32_t*)(location));
+				break;
+			case SVFL_DATATYPE_FLAGS:
+				printf("%s %s: (flags) %08x\n",tabs,curtag->name,*(int32_t*)(location));
+				break;
+			case SVFL_DATATYPE_FLOAT:
+				printf("%s %s: (float) %f\n",tabs,curtag->name,*(float*)(location));
+				break;
+			case SVFL_DATATYPE_VEC3:
+				printf("%s %s: (vec3) [%f %f %f]\n",tabs,curtag->name,
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8));
+				break;
+			case SVFL_DATATYPE_FLTX4:
+				printf("%s %s: (fltx4) [%f %f %f %f]\n",tabs,curtag->name,
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8),
+						*(float*)(location + 12));
+				break;
+			case SVFL_DATATYPE_VEC4:
+				printf("%s %s: (vec4) [%f %f %f %f]\n",tabs,curtag->name,
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8),
+						*(float*)(location + 12));
+				break;
+			case SVFL_DATATYPE_QUATERNION:
+				printf("%s %s: (quat) [x: %f y: %f z: %f w: %f]\n",tabs,curtag->name,
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8),
+						*(float*)(location + 12));
+				break;
+			case SVFL_DATATYPE_BOOLEAN:
+				printf("%s %s: (bool) %hhu\n",tabs,curtag->name,*(char*)(location));
+				break;
+			case SVFL_DATATYPE_STRING4:
+			case SVFL_DATATYPE_STRING:
+				printf("%s %s: (str) '%s'\n",tabs,curtag->name,((char*)(location) + *((uint32_t*)(location))));
+				break;
+			case SVFL_DATATYPE_VECTOR4D:
+				printf("%s %s: (vector4d) [%f %f %f %f]\n",tabs,curtag->name,
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8),
+						*(float*)(location + 12));
+				break;
+			case SVFL_DATATYPE_MATRIX3X4:
+				printf("%s %s: (matrix3x4) [ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",tabs,curtag->name,
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8),
+						*(float*)(location + 12),
+						tabs,
+						*(float*)(location + 16),
+						*(float*)(location + 20),
+						*(float*)(location + 24),
+						*(float*)(location + 28),
+						tabs,
+						*(float*)(location + 32),
+						*(float*)(location + 36),
+						*(float*)(location + 40),
+						*(float*)(location + 44));
+				break;
+			case SVFL_DATATYPE_MATRIX3X4A:
+				printf("%s %s: (matrix3x4a) [ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",tabs,curtag->name,
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8),
+						*(float*)(location + 12),
+						tabs,
+						*(float*)(location + 16),
+						*(float*)(location + 20),
+						*(float*)(location + 24),
+						*(float*)(location + 28),
+						tabs,
+						*(float*)(location + 32),
+						*(float*)(location + 36),
+						*(float*)(location + 40),
+						*(float*)(location + 44));
+				break;
+			case SVFL_DATATYPE_CTRANSFORM:
+				printf("%s %s: (CTransform(?)) [q={%f %f %f %f}, p={%f %f %f}]\n",tabs,curtag->name,
+						*(float*)(location + 16),
+						*(float*)(location + 20),
+						*(float*)(location + 24),
+						*(float*)(location + 28),
+						*(float*)(location),
+						*(float*)(location + 4),
+						*(float*)(location + 8));
+					// Note taht we do skip 4 bytes in here, for alignment purposes
+				break;
+			default:
+				printf("%s %s: (unhandled type %u)\n",tabs,curtag->name,curtag->df->datatype);
+				printf("(speculative value is %x)\n",*(uint32_t*)location);
+				break;
+		}
 	}
-	printf("[Parsing Finished] '%s' @%X\n",object->type->classname,(uint32_t)(object->data - data));
 }
 
 /*
@@ -329,93 +558,7 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro
 	}
 	uint32_t i;
 	for(i=0;i<curtype->hdf->num_tags;i++) {
-		uint32_t j;
-		int curref;
-		switch(curtype->tags[i].df->datatype) {
-			case SVFL_DATATYPE_SUBSTRUCT:
-				curref = curtype->tags[i].refindex;
-				if(curtype->tags[i].df->indirections.count == 1) {
-					uint32_t count = *(uint32_t*)(curtype->tags[i].df->offset_in_struct + obj->data + 4);
-					printf("%s %s [%u]: ˅\n",tabs,curtype->tags[i].name,count);
-					for(j=0;j<count;j++) {
-						print_object_recursive_internal(&(obj->children[curref][j]),depth+1,obj->children[curref][j].type);
-					}
-				} else {
-					uint32_t count = 1;
-					printf("%s %s [%u]: ˅\n",tabs,curtype->tags[i].name,count);
-					for(j=0;j<count;j++) {
-						print_object_recursive_internal(&(obj->children[curref][j]),depth+1,obj->children[curref][j].type);
-					}
-				}
-				break;
-			case SVFL_DATATYPE_ENUM:
-				printf("%s %s: (unknown enum) %u\n",tabs,curtype->tags[i].name,*(uint32_t*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				break;
-			case SVFL_DATATYPE_EXTREF:
-				if(curtype->tags[i].df->indirections.count == 1) {
-					uint32_t count = *(uint32_t*)(curtype->tags[i].df->offset_in_struct + obj->data + 4);
-					for(j=0;j<count;j++) {
-						printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtype->tags[i].name,*(uint64_t*)((char*)(obj->data + curtype->tags[i].df->offset_in_struct) + *((uint32_t*)(obj->data + curtype->tags[i].df->offset_in_struct)) + j * 8) );
-					}
-				} else {
-					printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtype->tags[i].name,*(uint64_t*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				}
-				break;
-			case SVFL_DATATYPE_BYTE:
-				if(curtype->tags[i].df->count == 0) {
-					printf("%s %s: (byte) %.2x\n",tabs,curtype->tags[i].name, *(char*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				} else {
-					printf("%s %s: (bytes)",tabs,curtype->tags[i].name);
-					uint16_t k;
-					for(k=0;k<curtype->tags[i].df->count;k++) {
-						printf(" %.2x ",*(char*)(obj->data + curtype->tags[i].df->offset_in_struct));
-					}
-					printf("\n");
-				}
-				break;
-			case SVFL_DATATYPE_SINT:
-				printf("%s %s: (uint32) %u\n",tabs,curtype->tags[i].name,*(uint32_t*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				break;
-			case SVFL_DATATYPE_NUMBER:
-				printf("%s %s: (int32) %i\n",tabs,curtype->tags[i].name,*(int32_t*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				break;
-			case SVFL_DATATYPE_FLAGS:
-				printf("%s %s: (flags) %x\n",tabs,curtype->tags[i].name,*(int32_t*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				break;
-			case SVFL_DATATYPE_FLOAT:
-				printf("%s %s: (float) %f\n",tabs,curtype->tags[i].name,*(float*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				break;
-			case SVFL_DATATYPE_VEC3:
-				printf("%s %s: (vec3) [%f %f %f]\n",tabs,curtype->tags[i].name,
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 4),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 8));
-				break;
-			case SVFL_DATATYPE_VEC4:
-				printf("%s %s: (vec4) [%f %f %f %f]\n",tabs,curtype->tags[i].name,
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 4),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 8),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 12));
-				break;
-			case SVFL_DATATYPE_BOOLEAN:
-				printf("%s %s: (bool) %hhu\n",tabs,curtype->tags[i].name,*(char*)(obj->data + curtype->tags[i].df->offset_in_struct));
-				break;
-			case SVFL_DATATYPE_STRING4:
-			case SVFL_DATATYPE_STRING:
-				printf("%s %s: (str) '%s'\n",tabs,curtype->tags[i].name,((char*)(obj->data + curtype->tags[i].df->offset_in_struct) + *((uint32_t*)(obj->data + curtype->tags[i].df->offset_in_struct))));
-				break;
-			case SVFL_DATATYPE_VECTOR4D:
-				printf("%s %s: (vector4d) [%f %f %f %f]\n",tabs,curtype->tags[i].name,
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 4),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 8),
-						*(float*)(obj->data + curtype->tags[i].df->offset_in_struct + 12));
-				break;
-			default:
-				printf("%s %s: (unhandled type %u)\n",tabs,curtype->tags[i].name,curtype->tags[i].df->datatype);
-				break;
-		}
+		print_thing_at_location(obj, depth, &(curtype->tags[i]), curtype->tags[i].df->offset_in_struct + obj->data, curtype->tags[i].df->indirections.count);
 	}
 }
 
