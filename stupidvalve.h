@@ -64,9 +64,7 @@ typedef struct {
  */
 
 typedef struct {
-	uint32_t unknown1;
-	uint32_t numentries;	// Short and simple
-	uint32_t unknown2;	// fixes a crash after the reborn update.
+	offsetcount entries;
 } svfl_rerl_header_datafile;
 
 typedef struct {
@@ -253,6 +251,7 @@ typedef struct {
 #define SVFL_DATATYPE_UINT16 13
 #define SVFL_DATATYPE_NUMBER 14
 #define SVFL_DATATYPE_FLAGS 15
+#define SVFL_DATATYPE_UINT64 17
 #define SVFL_DATATYPE_FLOAT 18
 #define SVFL_DATATYPE_VEC3 22
 #define SVFL_DATATYPE_VECTOR4D 23
@@ -322,6 +321,22 @@ typedef struct {
 	svfl_ntro_header_datafile* df;
 	svfl_ntro_entry* entries;
 } svfl_ntro_header;
+
+/*
+ * VBIB sub
+ */
+// This structure shows up in mesh data for models.
+typedef struct {
+	offsetcount vertexheaders;
+	offsetcount indexheaders;
+} svfl_vbib_header_datafile;
+
+typedef struct {
+	uint32_t vertex_count;	//?
+	uint32_t vertex_size;	//?
+	offsetcount fra;	// format-related array ?
+	
+} svfl_vbib_vertex_header;
 
 /*
  * DATA sub

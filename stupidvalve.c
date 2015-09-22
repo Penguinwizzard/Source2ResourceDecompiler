@@ -26,10 +26,10 @@ void parse_svf(filedata* fd) {
 			//Parse as a Resource External Reference block
 			svfl_rerl_header* rh = (svfl_rerl_header*)&(ret->lumps[i]);
 			rh->df = (svfl_rerl_header_datafile*)rh->content;
-			rh->entries = (svfl_rerl_entry*)malloc(rh->df->numentries * sizeof(svfl_rerl_entry));
-			svfl_rerl_entry_datafile* dfs = (svfl_rerl_entry_datafile*)(((char*)rh->df)+sizeof(svfl_rerl_header_datafile)); 
+			rh->entries = (svfl_rerl_entry*)malloc(rh->df->entries.count * sizeof(svfl_rerl_entry));
+			svfl_rerl_entry_datafile* dfs = (svfl_rerl_entry_datafile*)OFFS(rh->df->entries.offset); 
 			uint32_t j;
-			for(j=0;j<rh->df->numentries;j++) {
+			for(j=0;j<rh->df->entries.count;j++) {
 				rh->entries[j].df = &(dfs[j]);
 				rh->entries[j].content = OFFS( rh->entries[j].df->offset );
 				printf("%.16" PRIx64 ": %s\n",rh->entries[j].df->objecttag,rh->entries[j].content);
@@ -188,6 +188,15 @@ void parse_svf(filedata* fd) {
 		} else if(strncmp(RLHI.tag,"DATA",4) == 0) {
 			printf("\tDATA Lump Length: %u\n",RLHI.length);
 			// We don't parse it until later
+		} else if(strncmp(RLHI.tag,"VBIB",4) == 0) {
+			printf("\tVBIB LUMP, POKE PWIZ\n");
+			char* output = (char*)malloc(2*RLHI.length*sizeof(char));
+			uint32_t j;
+			for(j=0;j<RLHI.length;j++) {
+				output[2*j] = (char)downconvert[*((uint8_t*)(OFFS(RLHI.offset)+j))/16];
+				output[2*j+1] = (char)downconvert[*((uint8_t*)(OFFS(RLHI.offset)+j))%16];
+			}
+			printf("%.*s\n",2*RLHI.length,output);
 		} else {
 			printf("\tUNHANDLED LUMP TYPE, POKE PWIZ\n");
 			char* output = (char*)malloc(2*RLHI.length*sizeof(char));
@@ -301,6 +310,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						levelsize = 4;
 						break;
 					case SVFL_DATATYPE_EXTREF:
+					case SVFL_DATATYPE_UINT64:
 						levelsize = 8;
 						break;
 					case SVFL_DATATYPE_VEC3:
@@ -367,6 +377,9 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 				break;
 			case SVFL_DATATYPE_FLAGS:
 				printf("%s %s: (flags) %08x\n",tabs,curtag->name,*(int32_t*)(location));
+				break;
+			case SVFL_DATATYPE_UINT64:
+				printf("%s %s: (uint64) %lu\n",tabs,curtag->name,*(uint64_t*)(location));
 				break;
 			case SVFL_DATATYPE_FLOAT:
 				printf("%s %s: (float) %f\n",tabs,curtag->name,*(float*)(location));
