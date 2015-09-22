@@ -177,10 +177,10 @@ void parse_svf(filedata* fd) {
 						}
 					}
 					if(nh->entries[j].tags[k].df->datatype == 1) {
-							nh->entries[j].tags[k].refindex = numrefs;
-							numrefs++;
+						nh->entries[j].tags[k].refindex = numrefs;
+						numrefs++;
 					} else {
-							nh->entries[j].tags[k].refindex = -1;
+						nh->entries[j].tags[k].refindex = -1;
 					}
 				}
 				nh->entries[j].numrefs = numrefs;
@@ -237,8 +237,6 @@ void parse_svf(filedata* fd) {
 		//fd->parsed_object = rootobject;
 		printf("\n\n");
 
-		printf("file starts at %p\n",fd->contents);
-		printf("data lump starts at %p\n",data);
 		print_object_recursive(rootobject);
 	} else if (ret->hdr->version == 1) {
 		// Version 1 files are stuff like panorama non-xml, and sounds
@@ -253,63 +251,7 @@ void parse_svf(filedata* fd) {
 	fd->parsed = ret;
 }
 
-/*
- * Walk the ntro tree for the data.
- * Note that this assumes that the type and content pointer for the object have been set.
- * Basically just handles making the other info. 
- */
-/*void parse_object(svfl_struct* object, svfl_ntro_header* ntro, char* data) {
-  uint32_t i;
-  if(object->type->numrefs > 0) {
-  object->children = (svfl_struct**)malloc(object->type->numrefs * sizeof(svfl_struct));
-  } else {
-  object->children = NULL;
-  }
-  for(i=0;i<object->type->hdf->num_tags;i++) {
-  int curref = object->type->tags[i].refindex;
-  if(curref == -1) {
-  continue;
-  }
-// Is this how we indicate contained structs vs referenced structs?
-// Since these can be multiple (because of arrays and the like) we have to allocate arrays and the like.
-if(object->type->tags[i].df->indirections.count == 1) {
-uint32_t offset = *((uint32_t*)(object->type->tags[i].df->offset_in_struct + object->data));
-uint32_t count = *((uint32_t*)(object->type->tags[i].df->offset_in_struct + object->data + 4));
-if(count > 0) {
-uint32_t j;
-svfl_ntro_entry* childtype = do_type_lookup(ntro, object->type->tags[i].df->ref_typetag);
-for(j=0;j<count;j++) {
-object->children[curref][j].NTRO = ntro;
-object->children[curref][j].type = childtype;
-object->children[curref][j].data = object->type->tags[i].df->offset_in_struct + object->data + offset + childtype->hdf->length * j;
-parse_object(&(object->children[curref][j]),ntro,data);
-}
-}
-else {
-object->children[curref] = NULL;
-}
-} else {
-// Note: figure out when this isn't 1
-printf("Potential Multiple (in %s)?\n",object->type->classname);
-uint32_t count = 1; // PROBABLY INCORRECT
-object->children[curref] = (svfl_struct*)malloc(count*sizeof(svfl_struct));
-uint32_t j;
-svfl_ntro_entry* childtype = do_type_lookup(ntro, object->type->tags[i].df->ref_typetag);
-for(j=0;j<count;j++) {
-object->children[curref][j].NTRO = ntro;
-object->children[curref][j].type = childtype;
-object->children[curref][j].data = object->data + object->type->tags[i].df->offset_in_struct + childtype->hdf->length * j;
-parse_object(&(object->children[curref][j]),ntro,data);
-}
-}
-//uint32_t count;
-//uint32_t length;
-//object->children[curref].type = do_type_lookup(ntro,object->type->tags[i].df->ref_typetag);
-//object->children[curref].content = data + object->
-}
-printf("[Parsing Finished] '%s' @%X\n",object->type->classname,(uint32_t)(object->data - data));
-}*/
-
+// STUB
 void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro_entry* curtype);
 
 /*
@@ -318,6 +260,7 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro
 void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_tag* curtag, char* location, int indirectionlevels) {
 	char* tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+(50-depth);
 	if(indirectionlevels > 0) {
+		// follow the level of indirection to determine what to do
 		char* baseaddr = OFFS(curtag->df->indirections.offset);
 		uint32_t indirectiontype = *(uint8_t*)((curtag->df->indirections.count-indirectionlevels) + baseaddr);
 		if(indirectiontype == 3) {
@@ -384,6 +327,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 			}
 		}
 	} else {
+		// Just print the thing at the specified address by type
 		switch(curtag->df->datatype) {
 			svfl_struct* child;
 			case SVFL_DATATYPE_SUBSTRUCT:
@@ -393,32 +337,12 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 				child->type = do_type_lookup(obj->NTRO, curtag->df->ref_typetag);
 				child->data = location;
 				print_object_recursive_internal(child, depth+1, do_type_lookup(obj->NTRO, curtag->df->ref_typetag));
-				/*if(curtype->tags[i].df->indirections.count == 1) {
-					uint32_t count = *(uint32_t*)( + 4);
-					printf("%s %s [%u]: \n",tabs,curtype->tags[i].name,count);
-					for(j=0;j<count;j++) {
-						print_object_recursive_internal(&(obj->children[curref][j]),depth+1,obj->children[curref][j].type);
-					}
-				} else {
-					uint32_t count = 1;
-					printf("%s %s [%u]: ˅\n",tabs,curtype->tags[i].name,count);
-					for(j=0;j<count;j++) {
-						print_object_recursive_internal(&(obj->children[curref][j]),depth+1,obj->children[curref][j].type);
-					}
-				}*/
 				break;
 			case SVFL_DATATYPE_ENUM:
 				printf("%s %s: (unknown enum) %u\n",tabs,curtag->name,*(uint32_t*)(location));
 				break;
 			case SVFL_DATATYPE_EXTREF:
-				/*if(curtag->df->indirections.count == 1) {
-					uint32_t count = *(uint32_t*)(curtype->tags[i].df->offset_in_struct + obj->data + 4);
-					for(j=0;j<count;j++) {
-						printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtag->name,*(uint64_t*)((char*)(obj->data + curtag->df->offset_in_struct) + *((uint32_t*)(obj->data + curtag->df->offset_in_struct)) + j * 8) );
-					}
-				} else {*/
-					printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtag->name,*(uint64_t*)(location));
-				//}
+				printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtag->name,*(uint64_t*)(location));
 				break;
 			case SVFL_DATATYPE_BYTE:
 				if(curtag->df->count == 0) {
@@ -531,11 +455,10 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8));
-					// Note taht we do skip 4 bytes in here, for alignment purposes
+				// Note that we do skip 4 bytes in here, for alignment purposes
 				break;
 			default:
 				printf("%s %s: (unhandled type %u)\n",tabs,curtag->name,curtag->df->datatype);
-				printf("(speculative value is %x)\n",*(uint32_t*)location);
 				break;
 		}
 	}
