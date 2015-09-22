@@ -139,10 +139,10 @@ void parse_svf(filedata* fd) {
 			svfl_ntro_header* nh = (svfl_ntro_header*)&(ret->lumps[i]);
 			nh->df = (svfl_ntro_header_datafile*)nh->content;
 			printf("\tVersion: %i\n",nh->df->version);
-			nh->entries = (svfl_ntro_entry*)malloc(nh->df->numentries * sizeof(svfl_ntro_entry));
+			nh->entries = (svfl_ntro_entry*)malloc(nh->df->entries.count * sizeof(svfl_ntro_entry));
 			uint32_t j;
-			for(j=0;j < nh->df->numentries;j++) {
-				nh->entries[j].hdf = (svfl_ntro_entry_header_datafile*)(OFFS(nh->df->offset_entries)+j*sizeof(svfl_ntro_entry_header_datafile));
+			for(j=0;j < nh->df->entries.count;j++) {
+				nh->entries[j].hdf = (svfl_ntro_entry_header_datafile*)(OFFS(nh->df->entries.offset)+j*sizeof(svfl_ntro_entry_header_datafile));
 				nh->entries[j].classname = OFFS(nh->entries[j].hdf->offset_classname);
 				printf("\t%i: %-30s (length %u, type tag %.8X)\n",j,nh->entries[j].classname,nh->entries[j].hdf->length, nh->entries[j].hdf->typetag);
 				printf("\t  Version:%u | CRC:%.8X | uVersion:%u   L:%X A:%X Parent:%X flags:%hhX\n",
@@ -510,7 +510,7 @@ void print_object_recursive(svfl_struct* obj) {
  */
 svfl_ntro_entry* do_type_lookup(svfl_ntro_header* ntro, uint32_t typetag) {
 	uint32_t i;
-	for(i=0;i<ntro->df->numentries;i++) {
+	for(i=0;i<ntro->df->entries.count;i++) {
 		if(ntro->entries[i].hdf->typetag == typetag)
 			return &(ntro->entries[i]);
 	}

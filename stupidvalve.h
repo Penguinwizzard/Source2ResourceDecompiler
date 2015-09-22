@@ -311,8 +311,7 @@ typedef struct {
 
 typedef struct {
 	uint32_t version;
-	uint32_t offset_entries;
-	uint32_t numentries;
+	offsetcount entries;
 } svfl_ntro_header_datafile;
 
 typedef struct {
