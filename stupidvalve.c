@@ -139,13 +139,15 @@ void parse_svf(filedata* fd) {
 			svfl_ntro_header* nh = (svfl_ntro_header*)&(ret->lumps[i]);
 			nh->df = (svfl_ntro_header_datafile*)nh->content;
 			printf("\tVersion: %i\n",nh->df->version);
+			printf("\tContents: %u structs, %u enums\n",nh->df->entries.count,nh->df->enums.count);
 			nh->entries = (svfl_ntro_entry*)malloc(nh->df->entries.count * sizeof(svfl_ntro_entry));
 			uint32_t j;
+			printf("\tStructs:\n");
 			for(j=0;j < nh->df->entries.count;j++) {
 				nh->entries[j].hdf = (svfl_ntro_entry_header_datafile*)(OFFS(nh->df->entries.offset)+j*sizeof(svfl_ntro_entry_header_datafile));
 				nh->entries[j].classname = OFFS(nh->entries[j].hdf->offset_classname);
 				printf("\t%i: %-30s (length %u, type tag %.8X)\n",j,nh->entries[j].classname,nh->entries[j].hdf->length, nh->entries[j].hdf->typetag);
-				printf("\t  Version:%u | CRC:%.8X | uVersion:%u   L:%X A:%X Parent:%X flags:%hhX\n",
+				printf("\t  Version:%u | CRC:%.8X | uVersion:%i   L:%X A:%X Parent:%X flags:%hhX\n",
 						nh->entries[j].hdf->version,
 						nh->entries[j].hdf->crc,
 						nh->entries[j].hdf->user_version,
@@ -153,11 +155,11 @@ void parse_svf(filedata* fd) {
 						nh->entries[j].hdf->alignment,
 						nh->entries[j].hdf->base_struct_id,
 						nh->entries[j].hdf->struct_flags);
-				nh->entries[j].tags = (svfl_ntro_entry_tag*)malloc(nh->entries[j].hdf->num_tags * sizeof(svfl_ntro_entry_tag));
-				svfl_ntro_entry_tag_datafile* ths = (svfl_ntro_entry_tag_datafile*)OFFS(nh->entries[j].hdf->offset_tagheaders);
+				nh->entries[j].tags = (svfl_ntro_entry_tag*)malloc(nh->entries[j].hdf->tags.count * sizeof(svfl_ntro_entry_tag));
+				svfl_ntro_entry_tag_datafile* ths = (svfl_ntro_entry_tag_datafile*)OFFS(nh->entries[j].hdf->tags.offset);
 				int numrefs = 0;
 				uint32_t k;
-				for(k=0;k < nh->entries[j].hdf->num_tags; k++) {
+				for(k=0;k < nh->entries[j].hdf->tags.count; k++) {
 					nh->entries[j].tags[k].df = &(ths[k]);
 					nh->entries[j].tags[k].name = OFFS(nh->entries[j].tags[k].df->offset_tagname);
 					printf("\t\t%-30s: (count: %.4hX offset: %.4hX indirections.offset: %u indirections.count: %u datatype: %u), ref_typetag:%.8X\n",
@@ -184,6 +186,23 @@ void parse_svf(filedata* fd) {
 					}
 				}
 				nh->entries[j].numrefs = numrefs;
+			}
+			// Let's go expand all the enum data.
+			nh->enums = (svfl_ntro_enum*)malloc(nh->df->enums.count * sizeof(svfl_ntro_enum));
+			printf("\tEnums:\n");
+			for(j=0;j < nh->df->enums.count;j++) {
+				nh->enums[j].df = (svfl_ntro_enum_datafile*)(OFFS(nh->df->enums.offset)+j*sizeof(svfl_ntro_enum_datafile));
+				nh->enums[j].name = OFFS(nh->enums[j].df->offset_enumname);
+				printf("\t%i: %-30s (%u values, id %.8X)\n",j,nh->enums[j].name,nh->enums[j].df->fields.count,nh->enums[j].df->id);
+				printf("\t  Version:%u | CRC:%.8X | uVersion:%i\n",nh->enums[j].df->version, nh->enums[j].df->crc, nh->enums[j].df->user_version);
+				svfl_ntro_enum_field_datafile* efs = (svfl_ntro_enum_field_datafile*)OFFS(nh->enums[j].df->fields.offset);
+				uint32_t k;
+				nh->enums[j].fields = (svfl_ntro_enum_field*)malloc(nh->enums[j].df->fields.count * sizeof(svfl_ntro_enum_field));
+				for(k=0;k < nh->enums[j].df->fields.count;k++) {
+					nh->enums[j].fields[k].df = &(efs[k]);
+					nh->enums[j].fields[k].fieldname = OFFS(nh->enums[j].fields[k].df->offset_fieldname);
+					printf("\t\t%-30s = %u\n",nh->enums[j].fields[k].fieldname, nh->enums[j].fields[k].df->value);
+				}
 			}
 		} else if(strncmp(RLHI.tag,"DATA",4) == 0) {
 			printf("\tDATA Lump Length: %u\n",RLHI.length);
@@ -493,7 +512,7 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro
 		print_object_recursive_internal(obj, depth, parent);
 	}
 	uint32_t i;
-	for(i=0;i<curtype->hdf->num_tags;i++) {
+	for(i=0;i<curtype->hdf->tags.count;i++) {
 		print_thing_at_location(obj, depth, &(curtype->tags[i]), curtype->tags[i].df->offset_in_struct + obj->data, curtype->tags[i].df->indirections.count);
 	}
 }

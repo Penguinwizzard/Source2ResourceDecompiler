@@ -233,8 +233,7 @@ typedef struct {
 	uint16_t length;	// length in data lump
 	uint16_t alignment;	// Always 4? (thanks hmfd for tag)
 	uint32_t base_struct_id;// Always 0? (thanks hmfd for tag)
-	uint32_t offset_tagheaders;
-	uint32_t num_tags;
+	offsetcount tags;	// Where to find the tags
 	uint8_t struct_flags;
 	uint8_t padding[3];	// padding?
 } svfl_ntro_entry_header_datafile;
@@ -310,8 +309,34 @@ typedef struct {
 } svfl_ntro_entry;
 
 typedef struct {
+	uint32_t offset_fieldname;
+	uint32_t value;
+} svfl_ntro_enum_field_datafile;
+
+typedef struct {
+	svfl_ntro_enum_field_datafile* df;
+	char* fieldname;
+} svfl_ntro_enum_field;
+
+typedef struct {
+	uint32_t version;
+	uint32_t id;
+	uint32_t offset_enumname;
+	uint32_t crc;
+	 int32_t user_version;
+	offsetcount fields;
+} svfl_ntro_enum_datafile;
+
+typedef struct {
+	svfl_ntro_enum_datafile* df;
+	char* name;
+	svfl_ntro_enum_field* fields;
+} svfl_ntro_enum;
+
+typedef struct {
 	uint32_t version;
 	offsetcount entries;
+	offsetcount enums;
 } svfl_ntro_header_datafile;
 
 typedef struct {
@@ -319,6 +344,7 @@ typedef struct {
 	char* content;
 	svfl_ntro_header_datafile* df;
 	svfl_ntro_entry* entries;
+	svfl_ntro_enum* enums;
 } svfl_ntro_header;
 
 /*
