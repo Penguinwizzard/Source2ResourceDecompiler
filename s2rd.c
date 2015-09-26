@@ -21,7 +21,12 @@ int main(int argc, char** argv) {
 		}
 		return 0;
 	} else {
-		printf("Error: Unknown action '%s'.\n",argv[1]);
-		return 1;
+		//printf("Error: Unknown action '%s'.\n",argv[1]);
+		printf("Assuming you want just a decompile dump...\n");
+		filedata* data = loadfile(argv[1]);
+		if(data == NULL) {
+			printf("Error: Unable to load '%s' properly.\n",argv[1]);
+		}
+		return 0;
 	}
 }

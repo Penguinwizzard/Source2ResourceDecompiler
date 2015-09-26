@@ -4,6 +4,7 @@
 #include<sys/types.h>
 #include<inttypes.h>
 #include<errno.h>
+#include<stdbool.h>
 
 // Pretty common
 typedef struct {

@@ -380,7 +380,29 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 					if(index != thisenum->df->fields.count) {
 						printf("%s %s: (enum %s) [%u] (%s)\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location),thisenum->fields[index].fieldname);
 					} else {
-						printf("%s %s: (unknown enum field in enum %s) %u\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location));
+						// OK - it's likely a composite value (a | b), so let's try that
+						bool foundone = false;
+						for(index = 0; index < thisenum->df->fields.count; index++) {
+							if(((*(uint32_t*)location) & thisenum->fields[index].df->value) != 0) {
+								if(!foundone) {
+									foundone = true;
+									printf("%s %s: (enum %s) [%u](%s",tabs,curtag->name,thisenum->name,*(uint32_t*)(location),thisenum->fields[index].fieldname);
+								} else {
+									printf(" | %s",thisenum->fields[index].fieldname);
+								}
+							}
+						}
+						if(!foundone) {
+							if((*(uint32_t*)location) == 0) {
+								printf("%s %s: (enum %s) [%u] (unflagged)\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location));
+							} else {
+								// We really don't knwo what to do with the value now, so just print it
+								printf("%s %s: (unknown enum field in enum %s) %u\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location));
+							}
+						} else {
+							// if we did find one, terminate the line
+							printf(")\n");
+						}
 					}
 				} else {
 					printf("%s %s: (unknown enum) %u\n",tabs,curtag->name,*(uint32_t*)(location));
