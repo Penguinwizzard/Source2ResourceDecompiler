@@ -384,5 +384,6 @@ void parse_svf(filedata* fd);
 void parse_object(svfl_struct* object, svfl_ntro_header* ntro, char* data);
 void print_object_recursive(svfl_struct* object);
 svfl_ntro_entry* do_type_lookup(svfl_ntro_header* ntro, uint32_t typetag);
+svfl_ntro_enum* do_enum_lookup(svfl_ntro_header* ntro, uint32_t enumtag);
 void free_svf(filedata* fd);
 #endif

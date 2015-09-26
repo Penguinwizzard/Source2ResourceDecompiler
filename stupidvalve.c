@@ -359,6 +359,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 		// Just print the thing at the specified address by type
 		switch(curtag->df->datatype) {
 			svfl_struct* child;
+			svfl_ntro_enum* thisenum;
 			case SVFL_DATATYPE_SUBSTRUCT:
 				//curref = curtag->refindex;
 				child = (svfl_struct*)malloc(sizeof(svfl_struct));
@@ -368,7 +369,22 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 				print_object_recursive_internal(child, depth+1, do_type_lookup(obj->NTRO, curtag->df->ref_typetag));
 				break;
 			case SVFL_DATATYPE_ENUM:
-				printf("%s %s: (unknown enum) %u\n",tabs,curtag->name,*(uint32_t*)(location));
+				thisenum = do_enum_lookup(obj->NTRO,curtag->df->ref_typetag);
+				if(thisenum != NULL) {
+					uint32_t index;
+					for(index = 0; index < thisenum->df->fields.count; index++) {
+						if((*(uint32_t*)location) == thisenum->fields[index].df->value) {
+							break;
+						}
+					}
+					if(index != thisenum->df->fields.count) {
+						printf("%s %s: (enum %s) [%u] (%s)\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location),thisenum->fields[index].fieldname);
+					} else {
+						printf("%s %s: (unknown enum field in enum %s) %u\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location));
+					}
+				} else {
+					printf("%s %s: (unknown enum) %u\n",tabs,curtag->name,*(uint32_t*)(location));
+				}
 				break;
 			case SVFL_DATATYPE_EXTREF:
 				printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtag->name,*(uint64_t*)(location));
@@ -536,6 +552,20 @@ svfl_ntro_entry* do_type_lookup(svfl_ntro_header* ntro, uint32_t typetag) {
 	printf("FAILED CLASS LOOKUP (%.8X)\n",typetag);
 	return NULL;
 }
+
+/*
+ * Look up an enum entry in the ntro table by enumtag.
+ */
+svfl_ntro_enum* do_enum_lookup(svfl_ntro_header* ntro, uint32_t enumtag) {
+	uint32_t i;
+	for(i=0;i<ntro->df->enums.count;i++) {
+		if(ntro->enums[i].df->id == enumtag)
+			return &(ntro->enums[i]);
+	}
+	printf("FAILED ENUM LOOKUP (%.8X)\n",enumtag);
+	return NULL;
+}
+
 
 /*
  * Cleanup
