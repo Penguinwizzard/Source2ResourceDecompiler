@@ -14,7 +14,8 @@ typedef enum {
 	GNV,
 	VCS,
 	KV_CLOTH,
-	BSP    //Source 1, but w/e, let's id it at least
+	BSP,    	//Source 1, but w/e, let's id it at least
+	VBKV		//Very rarely used
 } filetype_t;
 
 typedef struct {

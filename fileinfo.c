@@ -36,6 +36,9 @@ void parse(filedata* fd) {
 	} else if(strncmp(fd->contents,"vcs2",4) == 0) {
 		fprintf(stderr,"Parsing as vcs...\n");
 		parse_vcs(fd);
+	} else if(strncmp(fd->contents,"VBKV",4) == 0) {
+		fprintf(stderr,"Parsing as vbkv. Currently not handled...and it's _super_ uncommon.\n");
+		fd->filetype = VBKV;
 	} else if(strncmp(fd->contents,"// file",7) == 0) {
 		fprintf(stderr,"Parsing as cloth...\n");
 		fd->filetype = KV_CLOTH;
