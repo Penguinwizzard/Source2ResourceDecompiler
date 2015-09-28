@@ -282,77 +282,158 @@ void parse_svf(filedata* fd) {
 // STUB
 void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro_entry* curtype);
 
+int typesize(svfl_ntro_header* ntro, svfl_ntro_entry_tag* tag, uint32_t indirectionindex) {
+	int levelsize = 0;
+	if(tag->df->indirections.count > indirectionindex) {
+		uint8_t type = *(uint8_t*)(indirectionindex + OFFS(tag->df->indirections.offset));
+		switch(type) {
+			case 3:
+				levelsize = 4;
+				break;
+			case 4:
+				levelsize = 8;
+				break;
+			default:
+				fprintf(stderr, "WARNING: tried to get size of unknown indirection type!\n");
+				levelsize = 4;
+				break;
+		}
+	} else {
+		switch(tag->df->datatype) {
+			case SVFL_DATATYPE_SUBSTRUCT:
+				levelsize = do_type_lookup(ntro, tag->df->ref_typetag)->hdf->length;
+				break;
+			case SVFL_DATATYPE_BYTE:
+			case SVFL_DATATYPE_BOOLEAN:
+				levelsize = 1;
+				break;
+			case SVFL_DATATYPE_SINT:
+			case SVFL_DATATYPE_UINT16:
+				levelsize = 2;
+				break;
+			case SVFL_DATATYPE_STRING4:
+			case SVFL_DATATYPE_ENUM:
+			case SVFL_DATATYPE_NUMBER:
+			case SVFL_DATATYPE_FLAGS:
+			case SVFL_DATATYPE_FLOAT:
+			case SVFL_DATATYPE_STRING:
+				levelsize = 4;
+				break;
+			case SVFL_DATATYPE_EXTREF:
+			case SVFL_DATATYPE_UINT64:
+				levelsize = 8;
+				break;
+			case SVFL_DATATYPE_VEC3:
+				levelsize = 12;
+				break;
+			case SVFL_DATATYPE_VECTOR4D:
+			case SVFL_DATATYPE_QUATERNION:
+			case SVFL_DATATYPE_FLTX4:
+			case SVFL_DATATYPE_VEC4:
+				levelsize = 16;
+				break;
+			case SVFL_DATATYPE_CTRANSFORM:
+				levelsize = 32;
+				break;
+			case SVFL_DATATYPE_MATRIX3X4:
+			case SVFL_DATATYPE_MATRIX3X4A:
+				levelsize = 48;
+				break;
+			default:
+				levelsize = 1;
+				fprintf(stderr, "WARNING: tried to get size of unknown data type!\n");
+		}
+	}
+	return levelsize;
+}
+
+char* gettypestring(uint32_t datatype) {
+	switch(datatype) {
+		case SVFL_DATATYPE_SUBSTRUCT:
+			return "substruct";
+		case SVFL_DATATYPE_ENUM:
+			return "enum";
+		case SVFL_DATATYPE_EXTREF:
+			return "ext ref";
+		case SVFL_DATATYPE_BYTE:
+			return "byte";
+		case SVFL_DATATYPE_SINT:
+			return "int16";
+		case SVFL_DATATYPE_UINT16:
+			return "uint16";
+		case SVFL_DATATYPE_NUMBER:
+			return "int32";
+		case SVFL_DATATYPE_FLAGS:
+			return "flags";
+		case SVFL_DATATYPE_UINT64:
+			return "uint64";
+		case SVFL_DATATYPE_FLOAT:
+			return "float";
+		case SVFL_DATATYPE_VEC3:
+			return "vec3";
+		case SVFL_DATATYPE_FLTX4:
+			return "fltx4";
+		case SVFL_DATATYPE_VEC4:
+			return "vec4";
+		case SVFL_DATATYPE_QUATERNION:
+			return "quaternion";
+		case SVFL_DATATYPE_BOOLEAN:
+			return "bool";
+		case SVFL_DATATYPE_STRING4:
+			return "string4";
+		case SVFL_DATATYPE_STRING:
+			return "string";
+		case SVFL_DATATYPE_VECTOR4D:
+			return "vector4d";
+		case SVFL_DATATYPE_MATRIX3X4:
+			return "matrix3x4";
+		case SVFL_DATATYPE_MATRIX3X4A:
+			return "matrix3x4a";
+		case SVFL_DATATYPE_CTRANSFORM:
+			return "CTransform";
+		default:
+			return "unhandled type";
+	}
+}
+
 /*
  * Print a single tagged item
  */
-void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_tag* curtag, char* location, int indirectionlevels) {
+void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_tag* curtag, char* location, uint32_t indirectionindex, bool ignorecount) {
 	char* tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"+(50-depth);
-	if(indirectionlevels > 0) {
+	printf("%s %s (%s) ",tabs,curtag->name,gettypestring(curtag->df->datatype));
+	if(curtag->df->count != 0 && !ignorecount) {
+		int numentries = curtag->df->count;
+		printf("[%d] ˅\n",numentries);
+		int i;
+		int eachsize = typesize(obj->NTRO,curtag,indirectionindex);
+		for(i=0;i<numentries;i++) {
+			print_thing_at_location(obj,depth+1,curtag,location+i*eachsize,indirectionindex,true);
+		}
+		return;
+	}
+	if(indirectionindex < curtag->df->indirections.count) {
 		// follow the level of indirection to determine what to do
 		char* baseaddr = OFFS(curtag->df->indirections.offset);
-		uint32_t indirectiontype = *(uint8_t*)((curtag->df->indirections.count-indirectionlevels) + baseaddr);
+		uint32_t indirectiontype = *(uint8_t*)(indirectionindex + baseaddr);
 		if(indirectiontype == 3) {
-			printf("%s %s (ptr): ˅\n",tabs, curtag->name);
+			printf("(ptr) ˅\n");
 			if((*(uint32_t*)location) == 0) {
 				// Null pointer
-				printf("%s\t -> NULL\n",tabs);
+				printf("%s\t -> NULL\n",tabs-1);
 			} else {
 				// single-object pointer derefernce
-				print_thing_at_location(obj, depth+1,curtag, location + *(uint32_t*)(location), indirectionlevels-1);
+				print_thing_at_location(obj, depth+1,curtag, location + *(uint32_t*)(location), indirectionindex+1, true);
 			}
 		}
 		if(indirectiontype == 4) {
 			uint32_t j;
 			uint32_t count = *(uint32_t*)(location + 4);
-			printf("%s %s [%u]: ˅\n",tabs, curtag->name, count);
-			uint32_t levelsize = 4;
-			if(indirectionlevels - 1 == 0) {
-				switch(curtag->df->datatype) {
-					case SVFL_DATATYPE_SUBSTRUCT:
-						levelsize = do_type_lookup(obj->NTRO, curtag->df->ref_typetag)->hdf->length;
-						break;
-					case SVFL_DATATYPE_BYTE:
-					case SVFL_DATATYPE_BOOLEAN:
-						levelsize = 1;
-						break;
-					case SVFL_DATATYPE_SINT:
-					case SVFL_DATATYPE_UINT16:
-						levelsize = 2;
-						break;
-					case SVFL_DATATYPE_STRING4:
-					case SVFL_DATATYPE_ENUM:
-					case SVFL_DATATYPE_NUMBER:
-					case SVFL_DATATYPE_FLAGS:
-					case SVFL_DATATYPE_FLOAT:
-					case SVFL_DATATYPE_STRING:
-					default:
-						levelsize = 4;
-						break;
-					case SVFL_DATATYPE_EXTREF:
-					case SVFL_DATATYPE_UINT64:
-						levelsize = 8;
-						break;
-					case SVFL_DATATYPE_VEC3:
-						levelsize = 12;
-						break;
-					case SVFL_DATATYPE_VECTOR4D:
-					case SVFL_DATATYPE_QUATERNION:
-					case SVFL_DATATYPE_FLTX4:
-					case SVFL_DATATYPE_VEC4:
-						levelsize = 16;
-						break;
-					case SVFL_DATATYPE_CTRANSFORM:
-						levelsize = 32;
-						break;
-					case SVFL_DATATYPE_MATRIX3X4:
-					case SVFL_DATATYPE_MATRIX3X4A:
-						levelsize = 48;
-						break;
-				}
-			}
+			printf("*[%u]: ˅\n", count);
+			uint32_t levelsize = typesize(obj->NTRO, curtag, indirectionindex+1);
 			for(j=0;j<count;j++) {
 				//printf("location will be %p\n",location + *(uint32_t*)(location) + j * levelsize);
-				print_thing_at_location(obj, depth+1,curtag, location + *(uint32_t*)(location) + j * levelsize, indirectionlevels-1);
+				print_thing_at_location(obj, depth+1,curtag, location + *(uint32_t*)(location) + j * levelsize, indirectionindex+1, true);
 			}
 		}
 	} else {
@@ -361,6 +442,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 			svfl_struct* child;
 			svfl_ntro_enum* thisenum;
 			case SVFL_DATATYPE_SUBSTRUCT:
+				printf("\n");
 				//curref = curtag->refindex;
 				child = (svfl_struct*)malloc(sizeof(svfl_struct));
 				child->NTRO = obj->NTRO;
@@ -378,7 +460,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						}
 					}
 					if(index != thisenum->df->fields.count) {
-						printf("%s %s: (enum %s) [%u] (%s)\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location),thisenum->fields[index].fieldname);
+						printf("(enum %s) [%u] (%s)\n",thisenum->name,*(uint32_t*)(location),thisenum->fields[index].fieldname);
 					} else {
 						// OK - it's likely a composite value (a | b), so let's try that
 						bool foundone = false;
@@ -386,7 +468,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 							if(((*(uint32_t*)location) & thisenum->fields[index].df->value) != 0) {
 								if(!foundone) {
 									foundone = true;
-									printf("%s %s: (enum %s) [%u](%s",tabs,curtag->name,thisenum->name,*(uint32_t*)(location),thisenum->fields[index].fieldname);
+									printf("(enum %s) [%u](%s",thisenum->name,*(uint32_t*)(location),thisenum->fields[index].fieldname);
 								} else {
 									printf(" | %s",thisenum->fields[index].fieldname);
 								}
@@ -394,10 +476,10 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						}
 						if(!foundone) {
 							if((*(uint32_t*)location) == 0) {
-								printf("%s %s: (enum %s) [%u] (unflagged)\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location));
+								printf("(enum %s) [%u] (unflagged)\n",thisenum->name,*(uint32_t*)(location));
 							} else {
 								// We really don't knwo what to do with the value now, so just print it
-								printf("%s %s: (unknown enum field in enum %s) %u\n",tabs,curtag->name,thisenum->name,*(uint32_t*)(location));
+								printf("(enum %s) (unknown enum field) %u\n",thisenum->name,*(uint32_t*)(location));
 							}
 						} else {
 							// if we did find one, terminate the line
@@ -405,85 +487,76 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						}
 					}
 				} else {
-					printf("%s %s: (unknown enum) %u\n",tabs,curtag->name,*(uint32_t*)(location));
+					printf("(unknown enum) %u\n",*(uint32_t*)(location));
 				}
 				break;
 			case SVFL_DATATYPE_EXTREF:
-				printf("%s %s: (ext ref) %.16" PRIx64 "\n",tabs,curtag->name,*(uint64_t*)(location));
+				printf("%.16" PRIx64 "\n",*(uint64_t*)(location));
 				break;
 			case SVFL_DATATYPE_BYTE:
-				if(curtag->df->count == 0) {
-					printf("%s %s: (byte) %.2x\n",tabs,curtag->name, *(char*)(location));
-				} else {
-					printf("%s %s: (bytes)",tabs,curtag->name);
-					uint16_t k;
-					for(k=0;k<curtag->df->count;k++) {
-						printf(" %.2x ",*(char*)(location));
-					}
-					printf("\n");
-				}
+				printf("%.2x\n",*(char*)(location));
 				break;
 			case SVFL_DATATYPE_SINT:
-				printf("%s %s: (int16) %u\n",tabs,curtag->name,*(int16_t*)(location));
+				printf("%u\n",*(int16_t*)(location));
 				break;
 			case SVFL_DATATYPE_UINT16:
-				printf("%s %s: (uint16) %hu\n",tabs,curtag->name,*(uint16_t*)(location));
+				printf("%hu\n",*(uint16_t*)(location));
 				break;
 			case SVFL_DATATYPE_NUMBER:
-				printf("%s %s: (int32) %i\n",tabs,curtag->name,*(int32_t*)(location));
+				printf("%i\n",*(int32_t*)(location));
 				break;
 			case SVFL_DATATYPE_FLAGS:
-				printf("%s %s: (flags) %08x\n",tabs,curtag->name,*(int32_t*)(location));
+				printf("%08x\n",*(int32_t*)(location));
 				break;
 			case SVFL_DATATYPE_UINT64:
-				printf("%s %s: (uint64) %lu\n",tabs,curtag->name,*(uint64_t*)(location));
+				printf("%lu\n",*(uint64_t*)(location));
 				break;
 			case SVFL_DATATYPE_FLOAT:
-				printf("%s %s: (float) %f\n",tabs,curtag->name,*(float*)(location));
+				printf("%f\n",*(float*)(location));
 				break;
 			case SVFL_DATATYPE_VEC3:
-				printf("%s %s: (vec3) [%f %f %f]\n",tabs,curtag->name,
+				printf("[%f %f %f]\n",
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8));
 				break;
 			case SVFL_DATATYPE_FLTX4:
-				printf("%s %s: (fltx4) [%f %f %f %f]\n",tabs,curtag->name,
+				printf("[%f %f %f %f]\n",
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8),
 						*(float*)(location + 12));
 				break;
 			case SVFL_DATATYPE_VEC4:
-				printf("%s %s: (vec4) [%f %f %f %f]\n",tabs,curtag->name,
+				printf("[%f %f %f %f]\n",
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8),
 						*(float*)(location + 12));
 				break;
 			case SVFL_DATATYPE_QUATERNION:
-				printf("%s %s: (quat) [x: %f y: %f z: %f w: %f]\n",tabs,curtag->name,
+				printf("[x: %f y: %f z: %f w: %f]\n",
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8),
 						*(float*)(location + 12));
 				break;
 			case SVFL_DATATYPE_BOOLEAN:
-				printf("%s %s: (bool) %hhu\n",tabs,curtag->name,*(char*)(location));
+				printf("%hhu\n",*(char*)(location));
 				break;
 			case SVFL_DATATYPE_STRING4:
 			case SVFL_DATATYPE_STRING:
-				printf("%s %s: (str) '%s'\n",tabs,curtag->name,((char*)(location) + *((uint32_t*)(location))));
+				printf("'%s'\n",((char*)(location) + *((uint32_t*)(location))));
 				break;
 			case SVFL_DATATYPE_VECTOR4D:
-				printf("%s %s: (vector4d) [%f %f %f %f]\n",tabs,curtag->name,
+				printf("[%f %f %f %f]\n",
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8),
 						*(float*)(location + 12));
 				break;
 			case SVFL_DATATYPE_MATRIX3X4:
-				printf("%s %s: (matrix3x4) [ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",tabs,curtag->name,
+				printf("[ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8),
@@ -500,7 +573,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						*(float*)(location + 44));
 				break;
 			case SVFL_DATATYPE_MATRIX3X4A:
-				printf("%s %s: (matrix3x4a) [ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",tabs,curtag->name,
+				printf("[ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",
 						*(float*)(location),
 						*(float*)(location + 4),
 						*(float*)(location + 8),
@@ -517,7 +590,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						*(float*)(location + 44));
 				break;
 			case SVFL_DATATYPE_CTRANSFORM:
-				printf("%s %s: (CTransform(?)) [q={%f %f %f %f}, p={%f %f %f}]\n",tabs,curtag->name,
+				printf("[q={%f %f %f %f}, p={%f %f %f}]\n",
 						*(float*)(location + 16),
 						*(float*)(location + 20),
 						*(float*)(location + 24),
@@ -528,7 +601,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 				// Note that we do skip 4 bytes in here, for alignment purposes
 				break;
 			default:
-				printf("%s %s: (unhandled type %u)\n",tabs,curtag->name,curtag->df->datatype);
+				printf("(unhandled type %u)\n",curtag->df->datatype);
 				break;
 		}
 	}
@@ -551,7 +624,7 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro
 	}
 	uint32_t i;
 	for(i=0;i<curtype->hdf->tags.count;i++) {
-		print_thing_at_location(obj, depth, &(curtype->tags[i]), curtype->tags[i].df->offset_in_struct + obj->data, curtype->tags[i].df->indirections.count);
+		print_thing_at_location(obj, depth, &(curtype->tags[i]), curtype->tags[i].df->offset_in_struct + obj->data, 0, false);
 	}
 }
 
