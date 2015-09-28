@@ -315,11 +315,11 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 					case SVFL_DATATYPE_BOOLEAN:
 						levelsize = 1;
 						break;
+					case SVFL_DATATYPE_SINT:
 					case SVFL_DATATYPE_UINT16:
 						levelsize = 2;
 						break;
 					case SVFL_DATATYPE_STRING4:
-					case SVFL_DATATYPE_SINT:
 					case SVFL_DATATYPE_ENUM:
 					case SVFL_DATATYPE_NUMBER:
 					case SVFL_DATATYPE_FLAGS:
@@ -424,7 +424,7 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 				}
 				break;
 			case SVFL_DATATYPE_SINT:
-				printf("%s %s: (uint32) %u\n",tabs,curtag->name,*(uint32_t*)(location));
+				printf("%s %s: (int16) %u\n",tabs,curtag->name,*(int16_t*)(location));
 				break;
 			case SVFL_DATATYPE_UINT16:
 				printf("%s %s: (uint16) %hu\n",tabs,curtag->name,*(uint16_t*)(location));
@@ -559,6 +559,8 @@ void print_object_recursive_internal(svfl_struct* obj, uint32_t depth, svfl_ntro
  * The external version (tab reasons)
  */
 void print_object_recursive(svfl_struct* obj) {
+	// Set rounding mode
+	fesetround(FE_TOWARDZERO);
 	print_object_recursive_internal(obj,0,obj->type);
 }
 

@@ -1,6 +1,6 @@
 #include "s2rd.h"
 
-void identifydecompiler(filedata* data) {
+dectodir identifydecompiler(filedata* data) {
 	switch(data->filetype) {
 		case SVF:
 			;
@@ -16,29 +16,31 @@ void identifydecompiler(filedata* data) {
 				}
 				if(i==ret->hdr->lumps.count) {
 					printf("not yet handled SVF type\n");
-					return;
+					return NULL;
 				}
 				svfl_ntro_header* nh = (svfl_ntro_header*)&(ret->lumps[i]);
 				switch(nh->entries[0].hdf->crc) {
 					default:
 						printf("not yet handled SVF type\n");
-						return;
+						return NULL;
 						break;
 				}
 			} else if(ret->hdr->version == 1) {
 				// Text container
 				printf("not yet handled SVF type\n");
-				return;
+				return SVF1_dectodir;
 			} else if(ret->hdr->version == 2) {
 				// Other text container?
 				printf("not yet handled SVF type\n");
-				return;
+				return NULL;
 			}
 			break;
 		default:
 			printf("no decompile target configured for this file type\n");
+			return NULL;
 			break;
 	}
+	return NULL;
 }
 
 int main(int argc, char** argv) {

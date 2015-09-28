@@ -5,6 +5,7 @@
 #include<inttypes.h>
 #include<errno.h>
 #include<stdbool.h>
+#include<fenv.h>
 
 // Pretty common
 typedef struct {
@@ -247,7 +248,7 @@ typedef struct {
 #define SVFL_DATATYPE_EXTREF 3
 #define SVFL_DATATYPE_STRING4 4
 #define SVFL_DATATYPE_BYTE 11
-#define SVFL_DATATYPE_SINT 12
+#define SVFL_DATATYPE_SINT 12		// INT16
 #define SVFL_DATATYPE_UINT16 13
 #define SVFL_DATATYPE_NUMBER 14
 #define SVFL_DATATYPE_FLAGS 15
