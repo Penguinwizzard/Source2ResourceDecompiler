@@ -556,22 +556,6 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 						*(float*)(location + 12));
 				break;
 			case SVFL_DATATYPE_MATRIX3X4:
-				printf("[ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",
-						*(float*)(location),
-						*(float*)(location + 4),
-						*(float*)(location + 8),
-						*(float*)(location + 12),
-						tabs,
-						*(float*)(location + 16),
-						*(float*)(location + 20),
-						*(float*)(location + 24),
-						*(float*)(location + 28),
-						tabs,
-						*(float*)(location + 32),
-						*(float*)(location + 36),
-						*(float*)(location + 40),
-						*(float*)(location + 44));
-				break;
 			case SVFL_DATATYPE_MATRIX3X4A:
 				printf("[ %f %f %f %f\n%s\t\t\t\t %f %f %f %f\n%s\t\t\t\t %f %f %f %f]\n",
 						*(float*)(location),
