@@ -48,9 +48,9 @@ char* construct_file(char* sourcefilename, char* sourcefilename2, char* contentd
 	// Information about source files
 	svfl_redi_sourceresource_datafile* sourceref = (svfl_redi_sourceresource_datafile*)pointer;
 	pointer += srhd->sourceresource.count * sizeof(svfl_redi_sourceresource_datafile);
-	sourceref[0].CRC = 0; // Who cares about passing tests?
-	sourceref[0].flags = 2;
-	sourceref[1].CRC = 0; // Who cares about passing tests?
+	sourceref[0].CRC = 0; // Valve generally doesn't compile a vxml, and this is just an alias, therefore the crc is 0
+	sourceref[0].flags = 1;
+	sourceref[1].CRC = 0; // This is generally non-zero, but it seems to be only used for checking when things need recompilation, which we're not bothering with (yet, anyway).
 	sourceref[1].flags = 2;
 	SETOFFS(srhd->sourceresource.offset, sourceref);
 	setOffsetString(sourceref[0].offset_filename,sourcefilename);
