@@ -314,8 +314,8 @@ int typesize(svfl_ntro_header* ntro, svfl_ntro_entry_tag* tag, uint32_t indirect
 				break;
 			case SVFL_DATATYPE_STRING4:
 			case SVFL_DATATYPE_ENUM:
-			case SVFL_DATATYPE_NUMBER:
-			case SVFL_DATATYPE_FLAGS:
+			case SVFL_DATATYPE_INT32:
+			case SVFL_DATATYPE_UINT32:
 			case SVFL_DATATYPE_FLOAT:
 			case SVFL_DATATYPE_STRING:
 				levelsize = 4;
@@ -364,10 +364,10 @@ char* gettypestring(uint32_t datatype) {
 			return "int16";
 		case SVFL_DATATYPE_UINT16:
 			return "uint16";
-		case SVFL_DATATYPE_NUMBER:
+		case SVFL_DATATYPE_INT32:
 			return "int32";
-		case SVFL_DATATYPE_FLAGS:
-			return "flags";
+		case SVFL_DATATYPE_UINT32:
+			return "uint32";
 		case SVFL_DATATYPE_UINT64:
 			return "uint64";
 		case SVFL_DATATYPE_FLOAT:
@@ -508,10 +508,10 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 			case SVFL_DATATYPE_UINT16:
 				printf("%hu\n",*(uint16_t*)(location));
 				break;
-			case SVFL_DATATYPE_NUMBER:
+			case SVFL_DATATYPE_INT32:
 				printf("%i\n",*(int32_t*)(location));
 				break;
-			case SVFL_DATATYPE_FLAGS:
+			case SVFL_DATATYPE_UINT32:
 				printf("%08x\n",*(int32_t*)(location));
 				break;
 			case SVFL_DATATYPE_UINT64:
