@@ -175,7 +175,7 @@ void parse_svf(filedata* fd) {
 						char* baseaddr = OFFS(nh->entries[j].tags[k].df->indirections.offset);
 						printf("\t\t\tindirections:\n");
 						for(inds = 0; inds < nh->entries[j].tags[k].df->indirections.count; inds++) {
-							printf("\t\t\t\tINDIRECTION TYPE %hhu\n",*(uint8_t*)(baseaddr+inds));
+							printf("\t\t\t\t%hhu\n",*(uint8_t*)(baseaddr+inds));
 						}
 					}
 					if(nh->entries[j].tags[k].df->datatype == 1) {
