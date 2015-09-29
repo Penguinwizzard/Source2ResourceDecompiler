@@ -497,10 +497,10 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 				printf("%.16" PRIx64 "\n",*(uint64_t*)(location));
 				break;
 			case SVFL_DATATYPE_INT8:
-				printf("%.2x\n",*(char*)(location));
+				printf("%hhx\n",*(char*)(location));
 				break;
 			case SVFL_DATATYPE_UINT8:
-				printf("%.2x\n",*(char*)(location));
+				printf("%hhx\n",*(char*)(location));
 				break;
 			case SVFL_DATATYPE_SINT:
 				printf("%u\n",*(int16_t*)(location));
