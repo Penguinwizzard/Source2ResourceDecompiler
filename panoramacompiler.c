@@ -5,7 +5,7 @@
 
 char* construct_file(char* sourcefilename, char* sourcefilename2, char* contentdirname, char* contents) {
 	uint32_t length = strlen(sourcefilename) + strlen(contents) + strlen(contentdirname) + 400;
-	svf_header* output = malloc(length);
+	svf_header* output = calloc(length,1);
 	char* pointer = (char*)output;
 	pointer += sizeof(svf_header);
 	output->always_twelve = 12;
