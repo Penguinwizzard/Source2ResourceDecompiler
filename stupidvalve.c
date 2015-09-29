@@ -175,7 +175,7 @@ void parse_svf(filedata* fd) {
 						char* baseaddr = OFFS(nh->entries[j].tags[k].df->indirections.offset);
 						printf("\t\t\tindirections:\n");
 						for(inds = 0; inds < nh->entries[j].tags[k].df->indirections.count; inds++) {
-							printf("\t\t\t\t%hhu\n",*(uint8_t*)(baseaddr+inds));
+							printf("\t\t\t\tINDIRECTION TYPE %hhu\n",*(uint8_t*)(baseaddr+inds));
 						}
 					}
 					if(nh->entries[j].tags[k].df->datatype == 1) {
@@ -303,7 +303,8 @@ int typesize(svfl_ntro_header* ntro, svfl_ntro_entry_tag* tag, uint32_t indirect
 			case SVFL_DATATYPE_SUBSTRUCT:
 				levelsize = do_type_lookup(ntro, tag->df->ref_typetag)->hdf->length;
 				break;
-			case SVFL_DATATYPE_BYTE:
+			case SVFL_DATATYPE_INT8:
+			case SVFL_DATATYPE_UINT8:
 			case SVFL_DATATYPE_BOOLEAN:
 				levelsize = 1;
 				break;
@@ -355,7 +356,9 @@ char* gettypestring(uint32_t datatype) {
 			return "enum";
 		case SVFL_DATATYPE_EXTREF:
 			return "ext ref";
-		case SVFL_DATATYPE_BYTE:
+		case SVFL_DATATYPE_INT8:
+			return "int8";
+		case SVFL_DATATYPE_UINT8:
 			return "byte";
 		case SVFL_DATATYPE_SINT:
 			return "int16";
@@ -493,7 +496,10 @@ void print_thing_at_location(svfl_struct* obj, uint32_t depth, svfl_ntro_entry_t
 			case SVFL_DATATYPE_EXTREF:
 				printf("%.16" PRIx64 "\n",*(uint64_t*)(location));
 				break;
-			case SVFL_DATATYPE_BYTE:
+			case SVFL_DATATYPE_INT8:
+				printf("%.2x\n",*(char*)(location));
+				break;
+			case SVFL_DATATYPE_UINT8:
 				printf("%.2x\n",*(char*)(location));
 				break;
 			case SVFL_DATATYPE_SINT:
