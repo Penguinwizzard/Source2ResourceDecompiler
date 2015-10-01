@@ -3,9 +3,24 @@
 #include "fileinfo.h"
 
 typedef struct {
+	union {
+		char tag_aschar[4];
+		uint32_t tag;
+	};
+	uint32_t unknown;		// Always 3E - Version info? 
+	uint32_t file_identifier;	// Used for identifying vcs files. This value
+					// is generally 0 in the features file of some
+					// set of shader files, and then some distinct
+					// value in the rest, which is then referenced
+					// in the features file itself.
+	// From here it changes...
+	uint32_t namelen;		// ONLY OCCURS IN THE FEATURES FILES (i.e. previous value is 0)
+} vcs_header;
+
+typedef struct {
 	uint32_t namelen;
 	char* name;
-	uint32_t counts[7];
+	uint32_t counts[8];
 } vcsfile;
 
 typedef struct {

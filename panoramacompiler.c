@@ -1,4 +1,5 @@
 #include "stupidvalve.h"
+#include "crc32.h"
 
 #define SETOFFS( x , y )  x = ((char*)( y )) - ((char*)&( x ));
 #define setOffsetString(a,b) strncpy(pointer, (b), 64); (a) = pointer - ((char*)&(a)); pointer += strlen(b)+1;
@@ -9,7 +10,7 @@ char* construct_file(char* sourcefilename, char* sourcefilename2, char* contentd
 	char* pointer = (char*)output;
 	pointer += sizeof(svf_header);
 	output->always_twelve = 12;
-	output->version = 1;
+	output->version = 2;
 	output->lumps.offset = 8;
 	output->lumps.count = 2; // REDI and DATA
 	svflump_header* headers = (svflump_header*)(pointer); 
@@ -95,21 +96,20 @@ char* construct_file(char* sourcefilename, char* sourcefilename2, char* contentd
 	SETOFFS(srhd->extradata_int.offset,sdentry);
 	setOffsetString(sdentry->offset_key,"IsChildResource");
 
-	// Close out redi by padding it to the next 16-byte alignment
-	/*if((pointer-(char*)srhd) % 16 != 0) {
-		pointer += 16-((pointer-(char*)srhd)%16);
-	}*/
-
 	// ok, that's it for REDI
 	SETOFFS(headers[0].offset,srhd);
 	headers[0].length = pointer - ((char*)srhd);
 	if((pointer - (char*)output)%16 != 0) {
 		pointer += 16-((pointer-(char*)output)%16);
 	}
+	// The 16-byte alignment for DATA isn't factored into block space
 	SETOFFS(headers[1].offset,pointer);
 	headers[1].length = strlen(contents) + 6;
-	strncpy(pointer,"",6);
-	pointer += 6;
+	// The 4-byte header from hell, and two bytes of 0
+	*((uint32_t*)pointer) = crc32(0,contents,strlen(contents));
+	pointer += 4;
+	*((uint16_t*)pointer) = 0;
+	pointer += 2;
 	strcpy(pointer,contents);
 	length = pointer + strlen(contents) - (char*)output;
 	output->filelength = length;
@@ -137,10 +137,6 @@ int main(int argc, char** argv) {
 	}
 	fclose(f);
 	buffer[size]='\0';
-	if(buffer[size-1] == '\n') {
-		size--;
-		buffer[size] = '\0';
-	}
 	char* output = construct_file(argv[3],argv[4],argv[5],buffer);
 	FILE* out = fopen(argv[2],"w");
 	if(out == NULL) {

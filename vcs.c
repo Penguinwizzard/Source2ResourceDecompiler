@@ -2,13 +2,19 @@
 
 void parse_vcs(filedata* fd) {
 	vcsfile* ret = (vcsfile*)malloc(sizeof(vcsfile));
+	vcs_header* vh = (vcs_header*)(fd->contents);
 	uint32_t cur = 0;
 	uint32_t type = 0;
-	if(*(uint32_t*)(fd->contents+8) == 0) {
-		ret->namelen = *(uint32_t*)(fd->contents+12);
+	printf("ID %.8X\n",vh->file_identifier);
+	if(vh->file_identifier == 0) {
+		// This means we're in the features file.
+		// This file contains information that identifies the shader.
+		ret->namelen = vh->namelen;
 		ret->name = fd->contents + 16;
 		memcpy(ret->counts,fd->contents + 16 + ret->namelen + 1,sizeof(ret->counts));
 		cur = 16 + ret->namelen + 1 + sizeof(ret->counts);
+		printf("Parsing as features file...\n");
+		printf("COUNTS: %d %d %d %d %d %d %d %d\n",ret->counts[0],ret->counts[1],ret->counts[2],ret->counts[3],ret->counts[4],ret->counts[5],ret->counts[6],ret->counts[7]);
 	} else {
 		ret->namelen = 0;
 		// Skip a bunch of stuff I don't recognize
