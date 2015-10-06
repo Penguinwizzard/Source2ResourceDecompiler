@@ -1,10 +1,14 @@
 *.o
-s2rd.exe
-s2rd
 *.stackdump
 *.swp
 *_sample/*
+s2rd.exe
+s2rd
 panoramacompiler.exe
+panoramacompiler
+panorepack.exe
+panorepack
 test
 testsvf
 testvcs
+testdmx

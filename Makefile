@@ -1,12 +1,16 @@
 CC=gcc
-CFLAGS=-c -O2 -Wall -Wextra
+CFLAGS=-c -O2 -Wall -Wextra -std=gnu99
 LFLAGS=-O2 -Wall -Wextra
 
-all: s2rd panoramacompiler
-panoramacompiler: panoramacompiler.o crc32.o
-	$(CC) $(LFLAGS) panoramacompiler.o crc32.o -o panoramacompiler
+all: s2rd panoramacompiler panorepack
+panoramacompiler: panoramacompiler.o crc32.o stupidvalve.o
+	$(CC) $(LFLAGS) panoramacompiler.o crc32.o stupidvalve.o -o panoramacompiler
 panoramacompiler.o: stupidvalve.h panoramacompiler.c
 	$(CC) $(CFLAGS) panoramacompiler.c -o panoramacompiler.o
+panorepack: panorepack.o crc32.o stupidvalve.o fileinfo.o vcs.o
+	$(CC) $(LFLAGS) panorepack.o crc32.o stupidvalve.o fileinfo.o vcs.o -o panorepack
+panorepack.o: panorepack.c
+	$(CC) $(CFLAGS) panorepack.c -o panorepack.o
 s2rd: s2rd.o fileinfo.o stupidvalve.o vcs.o decompilers/SVF1.o
 	$(CC) $(LFLAGS) s2rd.o fileinfo.o stupidvalve.o vcs.o decompilers/SVF1.o -o s2rd
 s2rd.o: s2rd.c s2rd.h
@@ -21,6 +25,10 @@ crc32.o: crc32.c crc32.h
 	$(CC) $(CFLAGS) crc32.c -o crc32.o
 decompilers/SVF1.o: decompilers/SVF1.c decompilers/SVF1.h
 	$(CC) $(CFLAGS) decompilers/SVF1.c -o decompilers/SVF1.o
+dmx/dmx.o: dmx/dmx.c dmx/dmx.h dmx/dmxb.h dmx/dmxbraw.h
+	$(CC) $(CFLAGS) dmx/dmx.c -o dmx/dmx.o
+dmx/dmxb.o: dmx/dmx.h dmx/dmxb.c dmx/dmxbraw.c
+	$(CC) $(CFLAGS) dmx/dmxb.c -o dmx/dmxb.o
 js: CC=emcc
 js: s2rd.js
 s2rd.js: s2rd.o fileinfo.o stupidvalve.o vcs.o
