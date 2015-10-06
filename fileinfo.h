@@ -26,8 +26,10 @@ typedef struct {
 	void* parsed_object;
 } filedata;
 
+uint64_t readintobuf(char* filename, char** out);
 filedata* loadfile(char* filename);
 void parse(filedata* fd);
+void fd_free(filedata* fd);
 
 #include "stupidvalve.h"
 #include "vcs.h"

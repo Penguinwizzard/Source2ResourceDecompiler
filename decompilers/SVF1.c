@@ -4,6 +4,10 @@
  * Write the needed file.
  */
 void SVF1_dectodir(DIR* out, filedata* fd) {
+	if(out == NULL) {
+		fprintf(stderr, "Error: output directory not specified for SVF1 decompile\n");
+		return;
+	}
 	svffile_generic* ret = fd->parsed;
 	if(ret->hdr->version != 1) {
 		fprintf(stderr, "Error: Using wrong decompile path\n");

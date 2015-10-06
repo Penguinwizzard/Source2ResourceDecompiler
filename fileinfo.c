@@ -1,20 +1,23 @@
 #include "fileinfo.h"
 
-filedata* loadfile(char* filename) {
-	FILE* file;
-	file = fopen(filename,"r");
+uint64_t readintobuf(char* filename, char** out) {
+	FILE* file = fopen(filename, "r");
 	if(file == NULL) {
 		fprintf(stderr,"Error: unable to open file '%s'\n",filename);
 		exit(2);
 	}
-	filedata* ret = (filedata*)calloc(1,sizeof(filedata));
 	fseek(file, 0, SEEK_END);
-	ret->length = ftell(file);
+	uint64_t length = ftell(file);
 	fseek(file, 0, SEEK_SET);
-	ret->contents = malloc((size_t)ret->length);
-	fread(ret->contents, ret->length, 1, file);
+	*out = (char*)malloc(length*sizeof(char));
+	fread(*out, length, 1, file);
 	fclose(file);
-	
+	return length;
+}
+
+filedata* loadfile(char* filename) {
+	filedata* ret = (filedata*)calloc(1,sizeof(filedata));
+	ret->length = readintobuf(filename, &(ret->contents));
 	printf("[File] Name: %s | Size: %lX bytes\n",filename,ret->length);
 	parse(ret);
 	return ret;
@@ -51,5 +54,12 @@ void parse(filedata* fd) {
 	} else {
 		fprintf(stderr,"Unknown file type.\n");
 		fd->filetype = UNKNOWN;
+	}
+}
+
+void fd_free(filedata* fd) {
+	if(fd == NULL) {
+		fprintf(stderr, "Error: Tried to fd_free null pointer!\n");
+		return;
 	}
 }

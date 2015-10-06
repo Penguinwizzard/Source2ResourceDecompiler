@@ -1,25 +1,6 @@
 #include "stupidvalve.h"
 #include "crc32.h"
 #include <stdio.h>
-#include <stdlib.h>
-
-#define SETOFFS( x , y )  x = ((char*)( y )) - ((char*)&( x ));
-#define setOffsetString(a,b) strncpy(pointer, (b), 64); (a) = pointer - ((char*)&(a)); pointer += strlen(b)+1;
-
-uint64_t readintobuf(char* filename, char** out) {
-	FILE* file;
-	file = fopen(filename, "r");
-	if(file == NULL) {
-		fprintf(stderr,"Error: unable to open file with name %s\n",filename);
-		exit(2);
-	}
-	fseek(file, 0, SEEK_END);
-	uint64_t length = ftell(file);
-	fseek(file, 0, SEEK_SET);
-	*out = (char*)malloc(length*sizeof(char));
-	fread(*out, length, 1, file);
-	return length;
-}
 
 int main(int argc, char** argv) {
 	if(argc < 4) {
@@ -27,14 +8,12 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 	filedata* fd = loadfile(argv[1]);
-	printf("TEST\n");
 	if(fd->filetype != SVF) {
 		fprintf(stderr,"Error: oldfile must be valid SVF file\n");
 		exit(4);
 	}
 	char* newcontents;
        	uint64_t newlen = readintobuf(argv[2], &newcontents);
-	printf("TEST\n");
 	svffile_generic* ret = fd->parsed;
 	// find the data lump header
 	uint32_t i;
@@ -49,7 +28,6 @@ int main(int argc, char** argv) {
 	}
 	uint64_t headerlen = fd->length - ret->lumpheaders[i].length;
 	uint64_t newtotallen = headerlen + newlen + 6;
-	printf("TEST\n");
 	char* newbuff = (char*)calloc(sizeof(char),newtotallen);
 	ret->lumpheaders[i].length = newlen + 6;
 	memcpy(newbuff, fd->contents, headerlen);
@@ -62,4 +40,8 @@ int main(int argc, char** argv) {
 		exit(16);
 	}
 	fwrite(newbuff, sizeof(char), newtotallen, of);
+	fclose(of);
+	free(newbuff);
+	free(newcontents);
+	fd_free(fd);
 }
