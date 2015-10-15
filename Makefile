@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-c -O2 -Wall -Wextra -std=gnu99
-LFLAGS=-O2 -Wall -Wextra
+LFLAGS=-O2 -Wall -Wextra -lm
 
 all: s2rd panoramacompiler panorepack
 panoramacompiler: panoramacompiler.o crc32.o stupidvalve.o
