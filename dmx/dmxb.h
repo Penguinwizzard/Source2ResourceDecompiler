@@ -1,6 +1,7 @@
 #ifndef DMXB_H
 #define DMXB_H
 #include "dmx.h"
+#include <stdlib.h>
 
 #define V3(fname, val) fname ## _ ## val
 #define V2(fname, val) V3(fname, val)
