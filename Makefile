@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-c -O2 -Wall -Wextra -pedantic -std=gnu99
+CFLAGS=-c -O2 -Wall -Wextra -pedantic -Wno-implicit-fallthrough -std=gnu99
 LFLAGS=-O2 -Wall -Wextra -pedantic -lm
 
 all: s2rd panoramacompiler panorepack
