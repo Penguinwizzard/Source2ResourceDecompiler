@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <inttypes.h>
 
 // a few types used in dmxes
 typedef struct {
