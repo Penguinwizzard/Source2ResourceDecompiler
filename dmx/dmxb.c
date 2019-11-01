@@ -11,37 +11,38 @@
  *  and conditionals.
  */
 
-#define V3(fname, val) fname ## _ ## val
+#define V3(fname, val) fname##_##val
 #define V2(fname, val) V3(fname, val)
-#define V(fname) V2(fname, DMXB )
+#define V(fname) V2(fname, DMXB)
 
-dmxattribute* allocindirectdmxattribute(dmx* obj) {
+dmxattribute *allocindirectdmxattribute(dmx *obj) {
 	// See if we need to increase the size of the buffer
-	if(obj->__attributebuf_length == obj->__attributebuf_count) {
+	if (obj->__attributebuf_length == obj->__attributebuf_count) {
 		obj->__attributebuf_length += 16;
-		obj->__indirectattributes = realloc(obj->__indirectattributes, obj->__attributebuf_length * sizeof(dmxattribute));
+		obj->__indirectattributes =
+		    realloc(obj->__indirectattributes,
+		            obj->__attributebuf_length * sizeof(dmxattribute));
 	}
 	obj->__attributebuf_count++;
-	return &(obj->__indirectattributes[obj->__attributebuf_count-1]);
+	return &(obj->__indirectattributes[obj->__attributebuf_count - 1]);
 }
 
-uint32_t lengths[] = {
-	0,
-	sizeof(int32_t),
-	sizeof(float),
-	sizeof(bool),
-	0,
-	0,
-	sizeof(uint32_t),
-	sizeof(uint32_t),
-	0,
-	0,
-	0,
-	0,
-	0,
-	0,
-	sizeof(uint64_t)+2,
-	sizeof(uint8_t)};
+uint32_t lengths[] = {0,
+                      sizeof(int32_t),
+                      sizeof(float),
+                      sizeof(bool),
+                      0,
+                      0,
+                      sizeof(uint32_t),
+                      sizeof(uint32_t),
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      sizeof(uint64_t) + 2,
+                      sizeof(uint8_t)};
 
 #define DMXB 1
 #include "dmxbraw.c"

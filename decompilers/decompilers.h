@@ -4,5 +4,5 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-typedef void (*dectodir)(DIR* out, filedata* fd);
+typedef void (*dectodir)(DIR *out, filedata *fd);
 #endif

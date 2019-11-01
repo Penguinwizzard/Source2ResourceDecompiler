@@ -1,6 +1,6 @@
 typedef struct {
 	uint32_t encodingversion;
-	char* type;
+	char *type;
 	uint32_t typeversion;
 } dmxfile;
 
@@ -24,6 +24,6 @@ typedef struct {
 } dmx_binary_header_datafile;
 
 typedef struct {
-	dmx_binary_header* df;
-	char** strings;
+	dmx_binary_header *df;
+	char **strings;
 } dmx_binary_header;
