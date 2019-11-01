@@ -296,6 +296,7 @@ dmx* V(dmx_from_buffer) (char* buffer, const unsigned int length) {
 #undef READSTRING
 
 // take a memory dmx, and put it in a data file appropriately
+/* TODO
 char* V(dmx_to_buffer) (dmx* in, long* length) {
 	if(in==NULL) {
 		fprintf(stderr, "Error: Tried writing dmx to null buffer!\n");
@@ -323,3 +324,4 @@ char* V(dmx_to_buffer) (dmx* in, long* length) {
 	*length = 0;
 	return NULL;
 }
+*/
