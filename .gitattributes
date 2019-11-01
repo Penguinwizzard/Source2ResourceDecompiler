@@ -1,0 +1,6 @@
+* text=auto eol=lf
+
+# VS
+*.sln text eol=crlf
+*.vcxproj text eol=crlf
+*.vcxproj.filters text eol=crlf
