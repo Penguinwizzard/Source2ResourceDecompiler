@@ -1,4 +1,5 @@
 CC=gcc
+#CC=clang
 CFLAGS=-c -O2 -Wall -Wextra -pedantic -Wno-implicit-fallthrough -std=gnu11
 LFLAGS=-O2 -Wall -Wextra -pedantic -lm
 
