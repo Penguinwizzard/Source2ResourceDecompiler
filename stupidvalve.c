@@ -613,9 +613,8 @@ void print_thing_at_location(svfl_struct *obj, uint32_t depth,
                              svfl_ntro_entry_tag *curtag, char *location,
                              uint32_t indirectionindex, bool ignorecount) {
 	char *tabs =
-	    "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
-	    "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" +
-	    (50 - depth);
+	    &("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+	      "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"[(50 - depth)]);
 	printf("%s %s (%s) ", tabs, curtag->name,
 	       gettypestring(curtag->df->datatype));
 	if (curtag->df->count != 0 && !ignorecount) {
@@ -871,9 +870,8 @@ void print_thing_at_location(svfl_struct *obj, uint32_t depth,
 void print_object_recursive_internal(svfl_struct *obj, uint32_t depth,
                                      svfl_ntro_entry *curtype) {
 	char *tabs =
-	    "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
-	    "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" +
-	    (50 - depth);
+	    &("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+	      "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"[(50 - depth)]);
 	// only print type name of the childmost class
 	if (obj->type == curtype)
 		printf("%s%s:\n", tabs, obj->type->classname);

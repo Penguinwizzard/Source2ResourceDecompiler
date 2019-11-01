@@ -287,7 +287,7 @@ dmx *V(dmx_from_buffer)(char *buffer, const unsigned int length) {
 		GUID *guid = READP(GUID);
 		printf("ELEMENT_PARSE_TEST: %s: %s (%s) %hhx\n", type, name,
 		       unknown, guid->bytes[0]);
-		printf("CORRUPTION CHECK: %p\n", strings[6]);
+		printf("CORRUPTION CHECK: %p\n", (void *)strings[6]);
 		fflush(stdout);
 	}
 	for (uint32_t i = 0; i < (uint32_t)(numstrings); i++) {
@@ -300,7 +300,7 @@ dmx *V(dmx_from_buffer)(char *buffer, const unsigned int length) {
 		       DMXB, numattributes, elem + 1, numelements);
 		fflush(stdout);
 		for (uint32_t i = 0; i < numattributes; i++) {
-			printf("strings[6] is %p\n", strings[6]);
+			printf("strings[6] is %p\n", (void *)strings[6]);
 			fflush(stdout);
 			STRING_INDEX_SIZE attrnameindex =
 			    READ(STRING_INDEX_SIZE);
@@ -308,7 +308,7 @@ dmx *V(dmx_from_buffer)(char *buffer, const unsigned int length) {
 			fflush(stdout);
 			char *attrname =
 			    V(dictsearch)(strings, attrnameindex, numstrings);
-			printf("2: strings[6] is %p\n", strings[6]);
+			printf("2: strings[6] is %p\n", (void *)strings[6]);
 			fflush(stdout);
 			printf("got string!\n");
 			fflush(stdout);
