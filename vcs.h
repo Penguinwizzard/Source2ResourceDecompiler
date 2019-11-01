@@ -7,19 +7,20 @@ typedef struct {
 		char tag_aschar[4];
 		uint32_t tag;
 	};
-	uint32_t unknown;		// Always 3E - Version info? 
-	uint32_t file_identifier;	// Used for identifying vcs files. This value
-					// is generally 0 in the features file of some
-					// set of shader files, and then some distinct
-					// value in the rest, which is then referenced
-					// in the features file itself.
+	uint32_t unknown;         // Always 3E - Version info?
+	uint32_t file_identifier; // Used for identifying vcs files. This value
+	                          // is generally 0 in the features file of some
+	                          // set of shader files, and then some distinct
+	                          // value in the rest, which is then referenced
+	                          // in the features file itself.
 	// From here it changes...
-	uint32_t namelen;		// ONLY OCCURS IN THE FEATURES FILES (i.e. previous value is 0)
+	uint32_t namelen; // ONLY OCCURS IN THE FEATURES FILES (i.e. previous
+	                  // value is 0)
 } vcs_header;
 
 typedef struct {
 	uint32_t namelen;
-	char* name;
+	char *name;
 	uint32_t counts[8];
 } vcsfile;
 
@@ -101,11 +102,11 @@ typedef struct {
 	};
 	uint32_t uncompressed_length;
 	uint32_t compressed_length;
-	uint32_t unknown1;	// Always 0x0400005d?
-	uint32_t unknown2;	// Some kind of flags?
+	uint32_t unknown1; // Always 0x0400005d?
+	uint32_t unknown2; // Some kind of flags?
 } vcsl_9_l;
 
-void parse_vcs(filedata* fd);
-void print_vcs(vcsfile* vcs);
-void free_vcs(filedata* fd);
+void parse_vcs(filedata *fd);
+void print_vcs(vcsfile *vcs);
+void free_vcs(filedata *fd);
 #endif
